@@ -1,0 +1,2 @@
+itchat-uos
+requests
