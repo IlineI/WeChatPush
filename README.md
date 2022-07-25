@@ -4,3 +4,4 @@
 需要修改main.py里的别名为消息接收里自己设置的    
 FarPash大佬的项目https://github.com/TSIOJeft/WeChatPush    
 唐大土土大佬的软件https://www.coolapk.com/apk/top.tdtt.news    
+服务器运行的话可以用   nohup python3 -u main.py > test.log 2>&1 &    命令      
