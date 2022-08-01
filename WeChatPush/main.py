@@ -4,7 +4,7 @@ import itchat.content
 # 你的消息接收别名
 # 例如aliasname = 'line'
 aliasname = '推送别名'
-# 你的消息推动黑名单,可为群名或者好友名，理论上可以按照格式无限添加
+# 你的消息推送黑名单,可为群名或者好友名，理论上可以按照格式无限添加
 # 例如blacklist = ["相亲相爱一家人","法外狂徒张三","..."]
 blacklist = ["black1", "balck2", "balck3"]
 
