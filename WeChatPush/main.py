@@ -39,7 +39,7 @@ def simple_reply(msg):
             itchat.content.REDENVELOPE: '[红包]',
             itchat.content.SHARING: '[分享]',
             itchat.content.EMOTICON: '[动画表情]',
-            itchat.content.VOIP: '[通话邀请]请及时打开微信',
+            itchat.content.VOIP: '[通话邀请]请及时打开微信查看',
             itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
             itchat.content.CARD: '[名片]' + str(msg.get('Text')),
             itchat.content.MUSICSHARE: '[音乐]' + str(msg.get('Text')),
