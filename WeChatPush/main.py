@@ -1,8 +1,6 @@
 import requests
 from requests.packages import urllib3
-
 import itchat.content
-
 # 你的消息接收别名
 # 例如aliasname = 'line'
 aliasname = '推送别名'
@@ -17,14 +15,10 @@ def text_reply(msg):
     if msg.user.nickName not in blacklist:
         urllib3.disable_warnings()
         print(msg.user.nickName + msg.text)
-        requests.get('https://send.tdtt.top/', params={'title': '%s' % msg.user.nickName, 'content': '%s' % msg.text,
-                                                       'alias': '%s' % aliasname}, verify=False)
+        requests.get('https://send.tdtt.top/', params={'title': '%s' % msg.user.nickName, 'content': '%s' % msg.text, 'alias': '%s' % aliasname}, verify=False)
 
-
-@itchat.msg_register([itchat.content.PICTURE, itchat.content.RECORDING, itchat.content.ATTACHMENT,
-                      itchat.content.VIDEO], isGroupChat=True)
-@itchat.msg_register([itchat.content.PICTURE, itchat.content.RECORDING, itchat.content.ATTACHMENT,
-                      itchat.content.VIDEO], isFriendChat=True)
+@itchat.msg_register([itchat.content.PICTURE, itchat.content.RECORDING, itchat.content.ATTACHMENT, itchat.content.VIDEO], isGroupChat=True)
+@itchat.msg_register([itchat.content.PICTURE, itchat.content.RECORDING, itchat.content.ATTACHMENT, itchat.content.VIDEO], isFriendChat=True)
 def download_files(msg):
     if msg.user.nickName not in blacklist:
         urllib3.disable_warnings()
@@ -34,10 +28,7 @@ def download_files(msg):
             itchat.content.ATTACHMENT: '[文件]',
             itchat.content.VIDEO: '[视频]', }.get(msg.type, 'fil')
         print(msg.user.nickName + typesymbol)
-        requests.get('https://send.tdtt.top/',
-                     params={'title': '%s' % msg.user.nickName, 'content': '%s' % typesymbol,
-                             'alias': '%s' % aliasname}, verify=False)
-
+        requests.get('https://send.tdtt.top/', params={'title': '%s' % msg.user.nickName, 'content': '%s' % typesymbol, 'alias': '%s' % aliasname}, verify=False)
 
 if __name__ == '__main__':
     itchat.check_login()
