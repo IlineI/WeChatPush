@@ -37,6 +37,7 @@ def simple_reply(msg):
             itchat.content.CHATHISTORY: '[聊天记录]',
             itchat.content.TRANSFER: '[转账]',
             itchat.content.REDENVELOPE: '[红包]',
+            itchat.content.SHARING: '[分享]',
             itchat.content.EMOTICON: '[动画表情]',
             itchat.content.VOIP: '[通话邀请]请及时打开微信',
             itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
@@ -45,10 +46,10 @@ def simple_reply(msg):
             itchat.content.MAP: '[位置分享]' + str(''.join(re.findall(r'poiname="(.*?)" poiid', str(msg.get('OriContent'))))),
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')),
-            itchat.content.SHARING: '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')),
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
-        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(name) + ': ' + str(typesymbol))
         requests.get(str(interface), params={'title': '微信 ' + str(name), 'content': str(typesymbol), 'alias': str(aliasname)}, verify=False)
+        typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
+        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(name) + ': ' + str(typesymbol))
 
 if __name__ == '__main__':
     itchat.check_login()
