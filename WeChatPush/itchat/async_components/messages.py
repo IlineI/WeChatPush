@@ -47,12 +47,7 @@ async def get_download_fn(core, url, msgId):
 
 
 def produce_msg(core, msgList):
-    ''' for messages types
-     * 40 msg, 43 videochat, 50 VOIPMSG, 52 voipnotifymsg
-     * 53 webwxvoipnotifymsg, 9999 sysnotice
-    '''
     rl = []
-    srl = [40, 43, 50, 52, 53, 9999]
     for m in msgList:
         # get actual opposite
         if m['FromUserName'] == core.storageClass.userName:
@@ -90,142 +85,84 @@ def produce_msg(core, msgList):
                 msg = {
                     'Type': 'Text',
                     'Text': m['Content'], }
-        elif m['MsgType'] == 3 or m['MsgType'] == 47:  # picture
-            download_fn = get_download_fn(core,
-                                          '%s/webwxgetmsgimg' % core.loginInfo['url'], m['NewMsgId'])
+        elif m['MsgType'] == 3:  # picture
             msg = {
-                'Type': 'Picture',
-                'FileName': '%s.%s' % (time.strftime('%y%m%d-%H%M%S', time.localtime()),
-                                       'png' if m['MsgType'] == 3 else 'gif'),
-                'Text': download_fn, }
+                'Type': 'Picture', }
         elif m['MsgType'] == 34:  # voice
-            download_fn = get_download_fn(core,
-                                          '%s/webwxgetvoice' % core.loginInfo['url'], m['NewMsgId'])
             msg = {
-                'Type': 'Recording',
-                'FileName': '%s.mp3' % time.strftime('%y%m%d-%H%M%S', time.localtime()),
-                'Text': download_fn, }
+                'Type': 'Recording', }
         elif m['MsgType'] == 37:  # friends
-            m['User']['UserName'] = m['RecommendInfo']['UserName']
             msg = {
                 'Type': 'Friends',
-                'Text': {
-                    'status': m['Status'],
-                    'userName': m['RecommendInfo']['UserName'],
-                    'verifyContent': m['Ticket'],
-                    'autoUpdate': m['RecommendInfo'], }, }
-            m['User'].verifyDict = msg['Text']
+                'Text': m['RecommendInfo']['NickName'], }
         elif m['MsgType'] == 42:  # name card
             msg = {
                 'Type': 'Card',
-                'Text': m['RecommendInfo'], }
+                'Text': m['RecommendInfo']['NickName'], }
         elif m['MsgType'] in (43, 62):  # tiny video
-            msgId = m['MsgId']
-
-            async def download_video(videoDir=None):
-                url = '%s/webwxgetvideo' % core.loginInfo['url']
-                params = {
-                    'msgid': msgId,
-                    'skey': core.loginInfo['skey'], }
-                headers = {'Range': 'bytes=0-', 'User-Agent': config.USER_AGENT}
-                r = core.s.get(url, params=params, headers=headers, stream=True)
-                tempStorage = io.BytesIO()
-                for block in r.iter_content(1024):
-                    tempStorage.write(block)
-                if videoDir is None:
-                    return tempStorage.getvalue()
-                with open(videoDir, 'wb') as f:
-                    f.write(tempStorage.getvalue())
-                return ReturnValue({'BaseResponse': {
-                    'ErrMsg': 'Successfully downloaded',
-                    'Ret': 0, }})
-
             msg = {
-                'Type': 'Video',
-                'FileName': '%s.mp4' % time.strftime('%y%m%d-%H%M%S', time.localtime()),
-                'Text': download_video, }
+                'Type': 'Video', }
+        elif m['MsgType'] == 47:  # emoti_con
+            msg = {
+                'Type': 'Emoticon', }
+        elif m['MsgType'] == 48:
+            msg = {
+                'Type': 'Location', }
         elif m['MsgType'] == 49:  # sharing
             if m['AppMsgType'] == 0:  # chat history
                 msg = {
-                    'Type': 'Note',
-                    'Text': m['Content'], }
+                    'Type': 'Chathistory', }
+            elif m['AppMsgType'] == 3:
+                msg = {
+                    'Type': 'Musicshare',
+                    'Text': m['FileName'], }
+            elif m['AppMsgType'] == 5:
+                msg = {
+                    'Type': 'Webshare',
+                    'Text': m['FileName'], }
             elif m['AppMsgType'] == 6:
-                rawMsg = m
-                cookiesList = {name: data for name, data in core.s.cookies.items()}
-
-                async def download_atta(attaDir=None):
-                    url = core.loginInfo['fileUrl'] + '/webwxgetmedia'
-                    params = {
-                        'sender': rawMsg['FromUserName'],
-                        'mediaid': rawMsg['MediaId'],
-                        'filename': rawMsg['FileName'],
-                        'fromuser': core.loginInfo['wxuin'],
-                        'pass_ticket': 'undefined',
-                        'webwx_data_ticket': cookiesList['webwx_data_ticket'], }
-                    headers = {'User-Agent': config.USER_AGENT}
-                    r = core.s.get(url, params=params, stream=True, headers=headers)
-                    tempStorage = io.BytesIO()
-                    for block in r.iter_content(1024):
-                        tempStorage.write(block)
-                    if attaDir is None:
-                        return tempStorage.getvalue()
-                    with open(attaDir, 'wb') as f:
-                        f.write(tempStorage.getvalue())
-                    return ReturnValue({'BaseResponse': {
-                        'ErrMsg': 'Successfully downloaded',
-                        'Ret': 0, }})
-
                 msg = {
                     'Type': 'Attachment',
-                    'Text': download_atta, }
+                    'Text': m['FileName'], }
             elif m['AppMsgType'] == 8:
-                download_fn = get_download_fn(core,
-                                              '%s/webwxgetmsgimg' % core.loginInfo['url'], m['NewMsgId'])
                 msg = {
-                    'Type': 'Picture',
-                    'FileName': '%s.gif' % (
-                        time.strftime('%y%m%d-%H%M%S', time.localtime())),
-                    'Text': download_fn, }
+                    'Type': 'Picture', }
             elif m['AppMsgType'] == 17:
                 msg = {
-                    'Type': 'Note',
+                    'Type': 'Locationshare',
+                    'Text': m['FileName'], }
+            elif m['AppMsgType'] == 33:
+                msg = {
+                    'Type': 'Miniprogram',
                     'Text': m['FileName'], }
             elif m['AppMsgType'] == 2000:
-                regx = r'\[CDATA\[(.+?)\][\s\S]+?\[CDATA\[(.+?)\]'
-                data = re.search(regx, m['Content'])
-                if data:
-                    data = data.group(2).split(u'\u3002')[0]
-                else:
-                    data = 'You may found detailed info in Content key.'
                 msg = {
-                    'Type': 'Note',
-                    'Text': data, }
+                    'Type': 'Transfer', }
             else:
                 msg = {
                     'Type': 'Sharing',
-                    'Text': m['FileName'], }
+                    'Text': m['AppMsgType'], }
+        elif m['MsgType'] in (50, 52, 53): # voip
+            msg = {
+                'Type': 'Voip', }
         elif m['MsgType'] == 51:  # phone init
             msg = update_local_uin(core, m)
         elif m['MsgType'] == 10000:
-            msg = {
-                'Type': 'Note',
-                'Text': m['Content'], }
+            if m['AppMsgType'] == 0:
+                msg = {
+                    'Type': 'Redenvelope', }
         elif m['MsgType'] == 10002:
-            regx = r'\[CDATA\[(.+?)\]\]'
-            data = re.search(regx, m['Content'])
-            data = 'System message' if data is None else data.group(1).replace('\\', '')
             msg = {
-                'Type': 'Note',
-                'Text': data, }
-        elif m['MsgType'] in srl:
+                'Type': 'Recalled', }
+        elif m['MsgType'] in (40, 9999):
             msg = {
                 'Type': 'Useless',
                 'Text': 'UselessMsg', }
         else:
-            logger.debug('Useless message received: %s\n%s' % (m['MsgType'], str(m)))
+            logger.debug('Undefined message received: %s\n%s' % (m['MsgType'], str(m)))
             msg = {
-                'Type': 'Useless',
-                'Text': 'UselessMsg', }
+                'Type': 'Undefined',
+                'Text': m['MsgType'], }
         m = dict(m, **msg)
         rl.append(m)
     return rl
