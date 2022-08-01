@@ -82,12 +82,9 @@ def produce_msg(core, msgList):
         m['User'].core = core
         if m['MsgType'] == 1:  # words
             if m['Url']:
-                regx = r'(.+?\(.+?\))'
-                data = re.search(regx, m['Content'])
-                data = 'Map' if data is None else data.group(1)
                 msg = {
                     'Type': 'Map',
-                    'Text': data, }
+                    'Text': m['Content'], }
             else:
                 msg = {
                     'Type': 'Text',
