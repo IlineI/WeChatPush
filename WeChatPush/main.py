@@ -4,7 +4,7 @@ import re
 from requests.packages import urllib3
 from datetime import datetime
 
-# 是否启用消息通知与通话邀请分开推送
+# 是否将消息通知与通话邀请分开推送
 # 若此项不为false，则需设置两个别名，一个用来接收消息通知，一个用来接收通话邀请
 # 好处是可以双开，将接收通话邀请的那个的通知声设置为电话铃声，起到强提醒的作用
 # 注意，一个app的mipush信息仅可设置一个通知声，所以需要双开才能设置两个不同的通知声
