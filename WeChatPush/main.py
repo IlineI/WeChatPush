@@ -13,7 +13,7 @@ separate_push = 'false'
 # 你的消息推送别名
 chat_alias = ''
 # 你的通话邀请推送别名，若separate_push为false则无需填写
-# 若separate_push不为false而此处未填写，则强制使用消息推送的别名
+# 若separate_push不为false而此项未填写，则强制使用消息推送的别名
 VoIP_alias = ''
 
 # 你的消息推送黑名单,可以是好友昵称或原群名，不是好友备注或群备注，理论上可以按照格式无限添加
