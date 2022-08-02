@@ -60,8 +60,8 @@ def simple_reply(msg):
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')),
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
-        global VoIP_alias = VoIP_alias if separate_push != 'false' and VoIP_alias != None else chat_alias
-        alias = VoIP_alias if msg.get('Type') == 'Voip' else chat_alias
+        voip_alias = VoIP_alias if separate_push != 'false' and VoIP_alias != '' else chat_alias
+        alias = voip_alias if msg.get('Type') == 'Voip' else chat_alias
         requests.get(str(interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'alias': str(alias)}, verify=False)
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(msg.get('Name')) + ': ' + str(typesymbol))
