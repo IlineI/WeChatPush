@@ -18,15 +18,17 @@ interface = 'https://tdtt.top/send'
 
 urllib3.disable_warnings()
 
-@itchat.msg_register([itchat.content.TEXT, itchat.content.FRIENDS, itchat.content.MUSICSHARE, itchat.content.UNDEFINED, itchat.content.PICTURE,
-                        itchat.content.RECORDING, itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD, itchat.content.EMOTICON,
-                        itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING,
-                        itchat.content.TRANSFER, itchat.content.REDENVELOPE, itchat.content.MINIPROGRAM, itchat.content.MAP], isFriendChat=True, isGroupChat=True)
+@itchat.msg_register([itchat.content.TEXT, itchat.content.FRIENDS, itchat.content.MUSICSHARE,
+                        itchat.content.UNDEFINED, itchat.content.PICTURE, itchat.content.RECORDING,
+                        itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD,
+                        itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE,
+                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING,
+                        itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
+                        itchat.content.REDENVELOPE, itchat.content.MINIPROGRAM], isFriendChat=True, isGroupChat=True)
 
 
 def simple_reply(msg):
-    name = msg.user.nickName if msg.user.remarkName == '' else msg.user.remarkName
-    if msg.user.nickName not in blacklist:
+    if msg.get('NickName') not in blacklist:
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
             itchat.content.FRIENDS: '好友请求',
@@ -43,13 +45,14 @@ def simple_reply(msg):
             itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
             itchat.content.CARD: '[名片]' + str(msg.get('Text')),
             itchat.content.MUSICSHARE: '[音乐]' + str(msg.get('Text')),
-            itchat.content.MAP: '[位置分享]' + str(''.join(re.findall(r'poiname="(.*?)" poiid', str(msg.get('OriContent'))))),
+            itchat.content.SERVICENOTIFICATION: str(msg.get('Text')),
+            itchat.content.MAP: '[位置分享]' + str(msg.get('Text')),
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')),
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
-        requests.get(str(interface), params={'title': '微信 ' + str(name), 'content': str(typesymbol), 'alias': str(aliasname)}, verify=False)
+        requests.get(str(interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'alias': str(aliasname)}, verify=False)
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
-        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(name) + ': ' + str(typesymbol))
+        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(msg.get('Name')) + ': ' + str(typesymbol))
 
 if __name__ == '__main__':
     itchat.check_login()
