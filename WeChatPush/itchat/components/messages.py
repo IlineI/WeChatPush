@@ -53,16 +53,16 @@ def produce_msg(core, msgList):
     rl = []
     for m in msgList:
         # get actual opposite
-        if m['FromUserName'] == core.storageClass.userName:
+        if m.get('FromUserName') == core.storageClass.userName:
             if config.SELF_MES:
-                actualOpposite = m['ToUserName']
+                actualOpposite = m.get('ToUserName')
             else:
                 # not send self mes
                 continue
         else:
-            actualOpposite = m['FromUserName']
+            actualOpposite = m.get('FromUserName')
         # produce basic message
-        if '@@' in m['FromUserName'] or '@@' in m['ToUserName']:
+        if '@@' in m.get('FromUserName') or '@@' in m.get('ToUserName'):
             produce_group_chat(core, m)
         else:
             utils.msg_formatter(m, 'Content')
@@ -80,93 +80,79 @@ def produce_msg(core, msgList):
                         templates.User(userName=actualOpposite)
             # by default we think there may be a user missing not a mp
         m['User'].core = core
-        if m['MsgType'] == 1:  # words
-            if m['Url']:
-                msg = {
-                    'Type': 'Map',
-                    'Text': m['Content'], }
-            else:
-                msg = {
-                    'Type': 'Text',
-                    'Text': m['Content'], }
-        elif m['MsgType'] == 3:  # picture
-            msg = {
-                'Type': 'Picture', }
-        elif m['MsgType'] == 34:  # voice
-            msg = {
-                'Type': 'Recording', }
-        elif m['MsgType'] == 37:  # friends
-            msg = {
-                'Type': 'Friends',
-                'Text': m['RecommendInfo']['NickName'], }
-        elif m['MsgType'] == 42:  # name card
-            msg = {
-                'Type': 'Card',
-                'Text': m['RecommendInfo']['NickName'], }
-        elif m['MsgType'] in (43, 62):  # tiny video
-            msg = {
-                'Type': 'Video', }
-        elif m['MsgType'] == 47:  # emoti_con
-            msg = {
-                'Type': 'Emoticon', }
-        elif m['MsgType'] == 48:
-            msg = {
-                'Type': 'Location', }
-        elif m['MsgType'] == 49:  # sharing
-            if m['AppMsgType'] == 0:  # chat history
-                msg = {
-                    'Type': 'Chathistory', }
-            elif m['AppMsgType'] == 3:
-                msg = {
-                    'Type': 'Musicshare',
-                    'Text': m['FileName'], }
-            elif m['AppMsgType'] == 5:
-                msg = {
-                    'Type': 'Webshare',
-                    'Text': m['FileName'], }
-            elif m['AppMsgType'] == 6:
-                msg = {
-                    'Type': 'Attachment',
-                    'Text': m['FileName'], }
-            elif m['AppMsgType'] == 8:
-                msg = {
-                    'Type': 'Picture', }
-            elif m['AppMsgType'] == 17:
-                msg = {
-                    'Type': 'Locationshare',
-                    'Text': m['FileName'], }
-            elif m['AppMsgType'] == 33:
-                msg = {
-                    'Type': 'Miniprogram',
-                    'Text': m['FileName'], }
-            elif m['AppMsgType'] == 2000:
-                msg = {
-                    'Type': 'Transfer', }
-            else:
-                msg = {
-                    'Type': 'Sharing',
-                    'Text': m['AppMsgType'], }
-        elif m['MsgType'] in (50, 52, 53): # voip
-            msg = {
-                'Type': 'Voip', }
-        elif m['MsgType'] == 51:  # phone init
-            msg = update_local_uin(core, m)
-        elif m['MsgType'] == 10000:
-            if m['AppMsgType'] == 0:
-                msg = {
-                    'Type': 'Redenvelope', }
-        elif m['MsgType'] == 10002:
-            msg = {
-                'Type': 'Recalled', }
-        elif m['MsgType'] in (40, 9999):
-            msg = {
-                'Type': 'Useless',
-                'Text': 'UselessMsg', }
+        msg = {}
+        if m.get('FromUserName') == 'weixin':
+            msg['Name'] = msg['NickName'] = '微信团队'
         else:
-            logger.debug('Undefined message received: %s\n%s' % (m['MsgType'], str(m)))
-            msg = {
-                'Type': 'Undefined',
-                'Text': m['MsgType'], }
+            msg['Name'] = m.get('User').get('NickName')  if m.get('User').get('RemarkName') == None else m.get('User').get('RemarkName')
+            msg['NickName'] = m.get('User').get('NickName')
+        if m.get('MsgType') == 1:  # words
+            if m.get('Url'):
+                msg['Type'] = 'Map'
+                msg['Text'] = str(''.join(re.findall(r'poiname="(.*?)" poiid', str(m.get('OriContent')))))
+            else:
+                msg['Type'] = 'Text'
+                msg['Text'] = m.get('Content')
+        elif m.get('MsgType') == 3:  # picture
+            msg['Type'] = 'Picture'
+        elif m.get('MsgType') == 34:  # voice
+            msg['Type'] = 'Recording'
+        elif m.get('MsgType') == 37:  # friends
+            msg['Type'] = 'Friends'
+            msg['Text'] = m.get('RecommendInfo').get('NickName')
+        elif m.get('MsgType') == 42:  # name card
+            msg['Type'] = 'Card'
+            msg['Text'] = m.get('RecommendInfo').get('NickName')
+        elif m.get('MsgType') in (43, 62):  # tiny video
+            msg['Type'] = 'Video'
+        elif m.get('MsgType') == 47:  # emoti_con
+            msg['Type'] = 'Emoticon'
+        elif m.get('MsgType') == 48:
+            msg['Type'] = 'Location'
+        elif m.get('MsgType') == 49:  # sharing
+            if msg.get('Name') == None:
+                msg['Name'] = msg['NickName'] = '服务通知'
+                msg['Type'] = 'Servicenotification'
+                msg['Text'] = m.get('FileName')
+            elif m.get('AppMsgType') == 0:  # chat history
+                msg['Type'] = 'Chathistory'
+            elif m.get('AppMsgType') == 3:
+                msg['Type'] = 'Musicshare'
+                msg['Text'] = m.get('FileName')
+            elif m.get('AppMsgType') == 5:
+                msg['Type'] = 'Webshare'
+                msg['Text'] = m.get('FileName')
+            elif m.get('AppMsgType') == 6:
+                msg['Type'] = 'Attachment'
+                msg['Text'] = m.get('FileName')
+            elif m.get('AppMsgType') == 8:
+                msg['Type'] = 'Picture'
+            elif m.get('AppMsgType') == 17:
+                msg['Type'] = 'Locationshare'
+                msg['Text'] = m.get('FileName')
+            elif m.get('AppMsgType') == 33:
+                msg['Type'] = 'Miniprogram'
+                msg['Text'] = m.get('FileName')
+            elif m.get('AppMsgType') == 2000:
+                msg['Type'] = 'Transfer'
+            else:
+                msg['Type'] = 'Sharing'
+                msg['Text'] = m.get('AppMsgType')
+        elif m.get('MsgType') in (50, 52, 53): # voip
+            msg['Type'] = 'Voip'
+        elif m.get('MsgType') == 51:  # phone init
+            msg = update_local_uin(core, m)
+        elif m.get('MsgType') == 10000:
+            if m.get('AppMsgType') == 0:
+                msg['Type'] = 'Redenvelope'
+        elif m.get('MsgType') == 10002:
+            msg['Type'] = 'Recalled'
+        elif m.get('MsgType') in (40, 9999):
+            msg['Type'] = 'Useless'
+            msg['Text'] = 'UselessMsg'
+        else:
+            msg['Type'] = 'Undefined'
+            msg['Text'] = m.get('MsgType')
         m = dict(m, **msg)
         rl.append(m)
     return rl
