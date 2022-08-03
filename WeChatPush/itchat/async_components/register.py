@@ -1,4 +1,5 @@
 import logging, traceback, sys, threading
+import os
 try:
     import Queue
 except ImportError:
