@@ -20,7 +20,7 @@ def load_register(core):
     core.run              = run
 
 async def auto_login(self, EventScanPayload=None,ScanStatus=None,event_stream=None,
-        hotReload=True, statusStorageDir=filepath.FilePath + '/itchat.pkl',
+        hotReload=True, statusStorageDir=str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')) + '/itchat.pkl',
         enableCmdQR=False, picDir=None, qrCallback=None,
         loginCallback=None, exitCallback=None):
     if not test_connect():
