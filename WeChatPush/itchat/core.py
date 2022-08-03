@@ -1,5 +1,7 @@
+import sys
+sys.path.append('./itchat')
+import filepath
 import requests
-import os
 
 from . import storage
 
@@ -25,7 +27,7 @@ class Core(object):
         self.s = requests.Session()
         self.uuid = None
         self.functionDict = {'FriendChat': {}, 'GroupChat': {}, 'MpChat': {}}
-        self.useHotReload, self.hotReloadDir = False, os.path.split(os.path.realpath(__file__))[0] + '/itchat.pkl'
+        self.useHotReload, self.hotReloadDir = False, filepath.FilePath + '/itchat.pkl'
         self.receivingRetryCount = 5
     def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
             loginCallback=None, exitCallback=None):
@@ -395,7 +397,7 @@ class Core(object):
             it is defined in components/hotreload.py
         '''
         raise NotImplementedError()
-    def auto_login(self, hotReload=False, statusStorageDir=os.path.split(os.path.realpath(__file__))[0] + '/itchat.pkl',
+    def auto_login(self, hotReload=False, statusStorageDir=filepath.FilePath + '/itchat.pkl',
             enableCmdQR=False, picDir=None, qrCallback=None,
             loginCallback=None, exitCallback=None):
         ''' log in like web wechat does
