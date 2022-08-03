@@ -1,5 +1,6 @@
 import logging, traceback, sys, threading
-import os
+sys.path.append('..')
+import filepath
 
 try:
     import Queue
@@ -20,7 +21,7 @@ def load_register(core):
     core.run = run
 
 
-def auto_login(self, hotReload=False, statusStorageDir=os.path.split(os.path.realpath(__file__))[0] + '/itchat.pkl',
+def auto_login(self, hotReload=False, statusStorageDir=filepath.FilePath + '/itchat.pkl',
                enableCmdQR=False, picDir=None, qrCallback=None,
                loginCallback=None, exitCallback=None):
     if not test_connect():
