@@ -2,9 +2,6 @@ import itchat.content
 import requests
 import re
 import os
-import sys
-sys.path.append('./itchat')
-import filepath
 from requests.packages import urllib3
 from datetime import datetime
 
@@ -20,7 +17,7 @@ urllib3.disable_warnings()
 
 
 def simple_reply(msg):
-    config = open(filepath.FilePath + '/config.txt', 'r', encoding='utf-8')
+    config = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/config.txt', 'r', encoding='utf-8')
     for line in config:
         if (re.findall(r'^separate_push = \'(.*?)\'', line)) != []:
             separate_push = str(''.join(re.findall(r'^separate_push = \'(.*?)\'', line)))
