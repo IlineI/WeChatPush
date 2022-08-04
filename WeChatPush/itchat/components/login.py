@@ -44,17 +44,13 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         return
     self.isLogging = True
     while self.isLogging:
-        uuid = push_login(self)
-        if uuid:
-            qrStorage = io.BytesIO()
-        else:
-            logger.info('Getting uuid of QR code.')
-            while not self.get_QRuuid():
-                time.sleep(1)
-            logger.info('Downloading QR code.')
-            qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
-                                    picDir=picDir, qrCallback=qrCallback)
-            logger.info('Please scan the QR code to log in.')
+        logger.info('Getting uuid of QR code.')
+        while not self.get_QRuuid():
+            time.sleep(1)
+        logger.info('Downloading QR code.')
+        qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
+                                picDir=picDir, qrCallback=qrCallback)
+        logger.info('Please scan the QR code to log in.')
         isLoggedIn = False
         while not isLoggedIn:
             status = self.check_login()
@@ -65,7 +61,7 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
                 isLoggedIn = True
             elif status == '201':
                 if isLoggedIn is not None:
-                    logger.info('Please press confirm on your phone and wait 10 sec.')
+                    logger.info('Please press confirm on your phone in 10 sec.')
                     isLoggedIn = None
                     time.sleep(10)
             elif status != '408':
@@ -109,7 +105,7 @@ def get_QRuuid(self):
     params = {
         'appid': 'wx782c26e4c19acffb',
         'fun': 'new',
-        'redirect_uri': 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?mod=desktop',
+        'redirect_uri': 'http://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?mod=desktop',
         'lang': 'zh_CN'}
     headers = {'User-Agent': config.USER_AGENT}
     r = self.s.get(url, params=params, headers=headers)
@@ -124,7 +120,7 @@ def get_QR(self, uuid=None, enableCmdQR=False, picDir=None, qrCallback=None):
     uuid = uuid or self.uuid
     picDir = picDir or config.DEFAULT_QR
     qrStorage = io.BytesIO()
-    qrCode = QRCode('https://login.weixin.qq.com/l/' + uuid)
+    qrCode = QRCode('http://login.weixin.qq.com/l/' + uuid)
     qrCode.png(qrStorage, scale=10)
     if hasattr(qrCallback, '__call__'):
         qrCallback(uuid=uuid, status='0', qrcode=qrStorage.getvalue())
@@ -170,7 +166,7 @@ def process_login_info(core, loginContent):
     headers = {'User-Agent': config.USER_AGENT,
                'client-version': config.UOS_PATCH_CLIENT_VERSION,
                'extspam': config.UOS_PATCH_EXTSPAM,
-               'referer': 'https://wx.qq.com/?&lang=zh_CN&target=t'
+               'referer': 'http://wx.qq.com/?&lang=zh_CN&target=t'
                }
     r = core.s.get(core.loginInfo['url'],
                    headers=headers, allow_redirects=False)
@@ -182,7 +178,7 @@ def process_login_info(core, loginContent):
             ("qq.com", ("file.wx.qq.com", "webpush.wx.qq.com")),
             ("web2.wechat.com", ("file.web2.wechat.com", "webpush.web2.wechat.com")),
             ("wechat.com", ("file.web.wechat.com", "webpush.web.wechat.com"))):
-        fileUrl, syncUrl = ['https://%s/cgi-bin/mmwebwx-bin' %
+        fileUrl, syncUrl = ['http://%s/cgi-bin/mmwebwx-bin' %
                             url for url in detailedUrl]
         if indexUrl in core.loginInfo['url']:
             core.loginInfo['fileUrl'], core.loginInfo['syncUrl'] = \
@@ -194,9 +190,8 @@ def process_login_info(core, loginContent):
     core.loginInfo['logintime'] = int(time.time() * 1e3)
     core.loginInfo['BaseRequest'] = {}
     cookies = core.s.cookies.get_dict()
-    skey = re.findall('<skey>(.*?)</skey>', r.text, re.S)[0]
-    pass_ticket = re.findall(
-        '<pass_ticket>(.*?)</pass_ticket>', r.text, re.S)[0]
+    skey = re.findall('<skey>(.*?)</skey>', r.text, re.S)
+    pass_ticket = re.findall('<pass_ticket>(.*?)</pass_ticket>', r.text, re.S)
     core.loginInfo['skey'] = core.loginInfo['BaseRequest']['Skey'] = skey
     core.loginInfo['wxsid'] = core.loginInfo['BaseRequest']['Sid'] = cookies["wxsid"]
     core.loginInfo['wxuin'] = core.loginInfo['BaseRequest']['Uin'] = cookies["wxuin"]
