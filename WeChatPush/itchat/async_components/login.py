@@ -41,25 +41,16 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
     self.isLogging = True
 
     while self.isLogging:
-        uuid = await push_login(self)
-        if uuid:
-            payload = EventScanPayload(
-                status=ScanStatus.Waiting,
-                qrcode=f"qrcode/https://login.weixin.qq.com/l/{uuid}"
-            )
-            event_stream.emit('scan', payload)
-            await asyncio.sleep(0.1)
-        else:
-            logger.info('Getting uuid of QR code.')
-            self.get_QRuuid()
-            payload = EventScanPayload(
-                status=ScanStatus.Waiting,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-            )
-            print(f"https://wechaty.js.org/qrcode/https://login.weixin.qq.com/l/{self.uuid}")
-            event_stream.emit('scan', payload)
-            await asyncio.sleep(0.1)
-            # logger.info('Please scan the QR code to log in.')
+        logger.info('Getting uuid of QR code.')
+        self.get_QRuuid()
+        payload = EventScanPayload(
+            status=ScanStatus.Waiting,
+            qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
+        )
+        print(f"https://wechaty.js.org/qrcode/http://login.weixin.qq.com/l/{self.uuid}")
+        event_stream.emit('scan', payload)
+        await asyncio.sleep(0.1)
+        # logger.info('Please scan the QR code to log in.')
         isLoggedIn = False
         while not isLoggedIn:
             status = await self.check_login()
@@ -75,8 +66,9 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
                 await asyncio.sleep(0.1)
             elif status == '201':
                 if isLoggedIn is not None:
-                    logger.info('Please press confirm on your phone.')
+                    logger.info('Please press confirm on your phone in 10 sec.')
                     isLoggedIn = None
+                    time.sleep(10)
                     payload = EventScanPayload(
                         status=ScanStatus.Waiting,
                         qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"

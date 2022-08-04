@@ -44,17 +44,13 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         return
     self.isLogging = True
     while self.isLogging:
-        uuid = push_login(self)
-        if uuid:
-            qrStorage = io.BytesIO()
-        else:
-            logger.info('Getting uuid of QR code.')
-            while not self.get_QRuuid():
-                time.sleep(1)
-            logger.info('Downloading QR code.')
-            qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
-                                    picDir=picDir, qrCallback=qrCallback)
-            logger.info('Please scan the QR code to log in.')
+        logger.info('Getting uuid of QR code.')
+        while not self.get_QRuuid():
+            time.sleep(1)
+        logger.info('Downloading QR code.')
+        qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
+                                picDir=picDir, qrCallback=qrCallback)
+        logger.info('Please scan the QR code to log in.')
         isLoggedIn = False
         while not isLoggedIn:
             status = self.check_login()
@@ -65,7 +61,7 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
                 isLoggedIn = True
             elif status == '201':
                 if isLoggedIn is not None:
-                    logger.info('Please press confirm on your phone and wait 10 sec.')
+                    logger.info('Please press confirm on your phone in 10 sec.')
                     isLoggedIn = None
                     time.sleep(10)
             elif status != '408':
@@ -195,8 +191,7 @@ def process_login_info(core, loginContent):
     core.loginInfo['BaseRequest'] = {}
     cookies = core.s.cookies.get_dict()
     skey = re.findall('<skey>(.*?)</skey>', r.text, re.S)[0]
-    pass_ticket = re.findall(
-        '<pass_ticket>(.*?)</pass_ticket>', r.text, re.S)[0]
+    pass_ticket = re.findall('<pass_ticket>(.*?)</pass_ticket>', r.text, re.S)[0]
     core.loginInfo['skey'] = core.loginInfo['BaseRequest']['Skey'] = skey
     core.loginInfo['wxsid'] = core.loginInfo['BaseRequest']['Sid'] = cookies["wxsid"]
     core.loginInfo['wxuin'] = core.loginInfo['BaseRequest']['Uin'] = cookies["wxuin"]
