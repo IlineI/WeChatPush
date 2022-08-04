@@ -4,7 +4,7 @@
      
 FarPash大佬的项目https://github.com/TSIOJeft/WeChatPush    
 唐大土土大佬的软件https://www.coolapk.com/apk/top.tdtt.news    
-感谢酷安的大佬 大鸟转转转酒吧（ll2594） Away`LL（chase535） 两位的贡献。    
+感谢酷安的大佬 大鸟转转转酒吧（chase535） Away`LL （ll2594）两位的贡献。    
      
 运行前先执行命令 pip3 install requirements.txt 安装库文件
 
