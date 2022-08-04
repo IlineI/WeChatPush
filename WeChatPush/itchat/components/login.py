@@ -44,6 +44,7 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         return
     self.isLogging = True
     while self.isLogging:
+        uuid = push_login(self)
         logger.info('Getting uuid of QR code.')
         while not self.get_QRuuid():
             time.sleep(1)
