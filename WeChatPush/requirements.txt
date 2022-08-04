@@ -1,2 +1,4 @@
 itchat-uos
 requests
+pyqrcode
+pypng
