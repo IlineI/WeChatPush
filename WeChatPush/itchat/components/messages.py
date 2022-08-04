@@ -110,7 +110,10 @@ def produce_msg(core, msgList):
         elif m.get('MsgType') == 48:
             msg['Type'] = 'Location'
         elif m.get('MsgType') == 49:  # sharing
-            if msg.get('Name') == None:
+            if m.get('FromUserName') == 'weixin':
+                msg['Type'] = 'Servicenotification'
+                msg['Text'] = m.get('FileName')
+            elif msg.get('Name') == None:
                 msg['Name'] = msg['NickName'] = '服务通知'
                 msg['Type'] = 'Servicenotification'
                 msg['Text'] = m.get('FileName')
