@@ -190,8 +190,8 @@ def process_login_info(core, loginContent):
     core.loginInfo['logintime'] = int(time.time() * 1e3)
     core.loginInfo['BaseRequest'] = {}
     cookies = core.s.cookies.get_dict()
-    skey = re.findall('<skey>(.*?)</skey>', r.text, re.S)
-    pass_ticket = re.findall('<pass_ticket>(.*?)</pass_ticket>', r.text, re.S)
+    skey = re.findall('<skey>(.*?)</skey>', r.text, re.S)[0]
+    pass_ticket = re.findall('<pass_ticket>(.*?)</pass_ticket>', r.text, re.S)[0]
     core.loginInfo['skey'] = core.loginInfo['BaseRequest']['Skey'] = skey
     core.loginInfo['wxsid'] = core.loginInfo['BaseRequest']['Sid'] = cookies["wxsid"]
     core.loginInfo['wxuin'] = core.loginInfo['BaseRequest']['Uin'] = cookies["wxuin"]
