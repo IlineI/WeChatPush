@@ -99,7 +99,7 @@ def run(self, debug=False, blockThread=True):
         try:
             while self.alive:
                 self.configured_reply()
-            farpush.mespush('Warning', 'Login out')
+            logger.info('Warning', 'Login out')
         except KeyboardInterrupt:
             if self.useHotReload:
                 self.dump_login_status()
