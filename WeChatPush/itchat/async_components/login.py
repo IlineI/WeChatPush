@@ -42,24 +42,16 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
 
     while self.isLogging:
         uuid = await push_login(self)
-        if uuid:
-            payload = EventScanPayload(
-                status=ScanStatus.Waiting,
-                qrcode=f"qrcode/https://login.weixin.qq.com/l/{uuid}"
-            )
-            event_stream.emit('scan', payload)
-            await asyncio.sleep(0.1)
-        else:
-            logger.info('Getting uuid of QR code.')
-            self.get_QRuuid()
-            payload = EventScanPayload(
-                status=ScanStatus.Waiting,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-            )
-            print(f"https://wechaty.js.org/qrcode/https://login.weixin.qq.com/l/{self.uuid}")
-            event_stream.emit('scan', payload)
-            await asyncio.sleep(0.1)
-            # logger.info('Please scan the QR code to log in.')
+        logger.info('Getting uuid of QR code.')
+        self.get_QRuuid()
+        payload = EventScanPayload(
+            status=ScanStatus.Waiting,
+            qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
+        )
+        print(f"http://wechaty.js.org/qrcode/http://login.weixin.qq.com/l/{self.uuid}")
+        event_stream.emit('scan', payload)
+        await asyncio.sleep(0.1)
+        # logger.info('Please scan the QR code to log in.')
         isLoggedIn = False
         while not isLoggedIn:
             status = await self.check_login()
@@ -69,24 +61,25 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
                 isLoggedIn = True
                 payload = EventScanPayload(
                     status=ScanStatus.Scanned,
-                    qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
+                    qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
                 )
                 event_stream.emit('scan', payload)
                 await asyncio.sleep(0.1)
             elif status == '201':
                 if isLoggedIn is not None:
-                    logger.info('Please press confirm on your phone.')
+                    logger.info('Please press confirm on your phone in 10 sec.')
                     isLoggedIn = None
+                    time.sleep(10)
                     payload = EventScanPayload(
                         status=ScanStatus.Waiting,
-                        qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
+                        qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
                     )
                     event_stream.emit('scan', payload)
                     await asyncio.sleep(0.1)
             elif status != '408':
                 payload = EventScanPayload(
                     status=ScanStatus.Cancel,
-                    qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
+                    qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
                 )
                 event_stream.emit('scan', payload)
                 await asyncio.sleep(0.1)
@@ -94,7 +87,7 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
         if isLoggedIn:
             payload = EventScanPayload(
                 status=ScanStatus.Confirmed,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
+                qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
             )
             event_stream.emit('scan', payload)
             await asyncio.sleep(0.1)
@@ -103,7 +96,7 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
             logger.info('Log in time out, reloading QR code.')
             payload = EventScanPayload(
                 status=ScanStatus.Timeout,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
+                qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
             )
             event_stream.emit('scan', payload)
             await asyncio.sleep(0.1)
@@ -140,7 +133,7 @@ def get_QRuuid(self):
     params = {
         'appid' : 'wx782c26e4c19acffb',
         'fun'   : 'new',
-        'redirect_uri' : 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?mod=desktop',
+        'redirect_uri' : 'http://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?mod=desktop',
         'lang'  : 'zh_CN' }
     headers = { 'User-Agent' : config.USER_AGENT}
     r = self.s.get(url, params=params, headers=headers)
@@ -154,7 +147,7 @@ async def get_QR(self, uuid=None, enableCmdQR=False, picDir=None, qrCallback=Non
     uuid = uuid or self.uuid
     picDir = picDir or config.DEFAULT_QR
     qrStorage = io.BytesIO()
-    qrCode = QRCode('https://login.weixin.qq.com/l/' + uuid)
+    qrCode = QRCode('http://login.weixin.qq.com/l/' + uuid)
     qrCode.png(qrStorage, scale=10)
     if hasattr(qrCallback, '__call__'):
         await qrCallback(uuid=uuid, status='0', qrcode=qrStorage.getvalue())
@@ -198,7 +191,7 @@ async def process_login_info(core, loginContent):
     headers = { 'User-Agent' : config.USER_AGENT,
                 'client-version' : config.UOS_PATCH_CLIENT_VERSION,
                 'extspam' : config.UOS_PATCH_EXTSPAM,
-                'referer' : 'https://wx.qq.com/?&lang=zh_CN&target=t'
+                'referer' : 'http://wx.qq.com/?&lang=zh_CN&target=t'
               }
     r = core.s.get(core.loginInfo['url'], headers=headers, allow_redirects=False)
     core.loginInfo['url'] = core.loginInfo['url'][:core.loginInfo['url'].rfind('/')]
@@ -208,7 +201,7 @@ async def process_login_info(core, loginContent):
             ("qq.com"          , ("file.wx.qq.com", "webpush.wx.qq.com")),
             ("web2.wechat.com" , ("file.web2.wechat.com", "webpush.web2.wechat.com")),
             ("wechat.com"      , ("file.web.wechat.com", "webpush.web.wechat.com"))):
-        fileUrl, syncUrl = ['https://%s/cgi-bin/mmwebwx-bin' % url for url in detailedUrl]
+        fileUrl, syncUrl = ['http://%s/cgi-bin/mmwebwx-bin' % url for url in detailedUrl]
         if indexUrl in core.loginInfo['url']:
             core.loginInfo['fileUrl'], core.loginInfo['syncUrl'] = \
                 fileUrl, syncUrl
