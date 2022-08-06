@@ -7,22 +7,32 @@ from datetime import datetime
 
 urllib3.disable_warnings()
 
-@itchat.msg_register([itchat.content.TEXT, itchat.content.FRIENDS, itchat.content.MUSICSHARE,
-                        itchat.content.UNDEFINED, itchat.content.PICTURE, itchat.content.RECORDING,
-                        itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD,
+@itchat.msg_register([itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD,
                         itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE,
-                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING,
+                        itchat.content.TEXT, itchat.content.FRIENDS, itchat.content.MUSICSHARE,
+                        itchat.content.UNDEFINED, itchat.content.PICTURE, itchat.content.RECORDING,
                         itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
-                        itchat.content.REDENVELOPE, itchat.content.MINIPROGRAM], isFriendChat=True, isGroupChat=True)
+                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING,
+                        itchat.content.REDENVELOPE, itchat.content.MINIPROGRAM, itchat.content.SYSTEMNOTIFICATION],
+                        isFriendChat=True, isGroupChat=True)
 
 
 def simple_reply(msg):
-    from config import separate_push
-    from config import chat_alias
-    from config import VoIP_regID
-    from config import blacklist
-    from config import chat_interface
-    from config import VoIP_interface
+    config = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/config.txt', 'r', encoding='utf-8')
+    for line in config:
+        if (re.findall(r'^separate_push = \'(.*?)\'', line)) != []:
+            separate_push = str(''.join(re.findall(r'^separate_push = \'(.*?)\'', line)))
+        elif (re.findall(r'^chat_alias = \'(.*?)\'', line)) != []:
+            chat_alias = str(''.join(re.findall(r'^chat_alias = \'(.*?)\'', line)))
+        elif (re.findall(r'^VoIP_regID = \'(.*?)\'', line)) != []:
+            VoIP_regID = str(''.join(re.findall(r'^VoIP_regID = \'(.*?)\'', line)))
+        elif (''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) != '':
+            blacklist = '[' + str(''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) + ']'
+        elif (re.findall(r'^chat_interface = \'(.*?)\'', line)) != []:
+            chat_interface = str(''.join(re.findall(r'^chat_interface = \'(.*?)\'', line)))
+        elif (re.findall(r'^VoIP_interface = \'(.*?)\'', line)) != []:
+            VoIP_interface = str(''.join(re.findall(r'^VoIP_interface = \'(.*?)\'', line)))
+    config.close()
     if msg.get('NickName') not in blacklist:
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
@@ -37,6 +47,7 @@ def simple_reply(msg):
             itchat.content.SHARING: '[分享]',
             itchat.content.EMOTICON: '[动画表情]',
             itchat.content.VOIP: '[通话邀请]请及时打开微信查看',
+            itchat.content.SYSTEMNOTIFICATION: '[系统通知]',
             itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
             itchat.content.CARD: '[名片]' + str(msg.get('Text')),
             itchat.content.MUSICSHARE: '[音乐]' + str(msg.get('Text')),
