@@ -17,19 +17,12 @@ urllib3.disable_warnings()
 
 
 def simple_reply(msg):
-    config = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/config.txt', 'r', encoding='utf-8')
-    for line in config:
-        if (re.findall(r'^separate_push = \'(.*?)\'', line)) != []:
-            separate_push = str(''.join(re.findall(r'^separate_push = \'(.*?)\'', line)))
-        elif (re.findall(r'^chat_alias = \'(.*?)\'', line)) != []:
-            chat_alias = str(''.join(re.findall(r'^chat_alias = \'(.*?)\'', line)))
-        elif (re.findall(r'^VoIP_alias = \'(.*?)\'', line)) != []:
-            VoIP_alias = str(''.join(re.findall(r'^VoIP_alias = \'(.*?)\'', line)))
-        elif (''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) != '':
-            blacklist = '[' + str(''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) + ']'
-        elif (re.findall(r'^interface = \'(.*?)\'', line)) != []:
-            interface = str(''.join(re.findall(r'^interface = \'(.*?)\'', line)))
-    config.close()
+    from config import separate_push
+    from config import chat_alias
+    from config import VoIP_regID
+    from config import blacklist
+    from config import chat_interface
+    from config import VoIP_interface
     if msg.get('NickName') not in blacklist:
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
@@ -52,9 +45,13 @@ def simple_reply(msg):
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')),
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
-        voip_alias = VoIP_alias if separate_push != 'false' and VoIP_alias != '' else chat_alias
-        alias = voip_alias if msg.get('Type') == 'Voip' else chat_alias
-        requests.get(str(interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'alias': str(alias)}, verify=False)
+        if msg.get('Type') == 'VoIP':
+            if separate_push != 'false' and VoIP_regID != '':
+                requests.post(str(VoIP_interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0'}, verify=False)
+            else:
+                requests.post(str(chat_interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+        else:
+            requests.post(str(chat_interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(msg.get('Name')) + ': ' + str(typesymbol))
 
