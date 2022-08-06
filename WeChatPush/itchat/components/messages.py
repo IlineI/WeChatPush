@@ -83,8 +83,10 @@ def produce_msg(core, msgList):
         msg = {}
         if m.get('FromUserName') == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
+        elif m.get('MsgType') == 37:
+            msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
         else:
-            msg['Name'] = m.get('User').get('NickName')  if m.get('User').get('RemarkName') == None else m.get('User').get('RemarkName')
+            msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
             msg['NickName'] = m.get('User').get('NickName')
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
@@ -99,7 +101,6 @@ def produce_msg(core, msgList):
             msg['Type'] = 'Recording'
         elif m.get('MsgType') == 37:  # friends
             msg['Type'] = 'Friends'
-            msg['Text'] = m.get('RecommendInfo').get('NickName')
         elif m.get('MsgType') == 42:  # name card
             msg['Type'] = 'Card'
             msg['Text'] = m.get('RecommendInfo').get('NickName')
@@ -146,8 +147,10 @@ def produce_msg(core, msgList):
         elif m.get('MsgType') == 51:  # phone init
             msg = update_local_uin(core, m)
         elif m.get('MsgType') == 10000:
-            if m.get('AppMsgType') == 0:
+            if m.get('AppMsgType') == 0 and m.get('Content') == '收到红包，请在手机上查看':
                 msg['Type'] = 'Redenvelope'
+            else:
+                msg['Type'] = 'Systemnotification'
         elif m.get('MsgType') == 10002:
             msg['Type'] = 'Recalled'
         elif m.get('MsgType') in (40, 9999):
