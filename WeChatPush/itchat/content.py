@@ -18,7 +18,7 @@ MINIPROGRAM = 'Miniprogram' #小程序分享
 CHATHISTORY = 'Chathistory' #聊天记录
 TRANSFER = 'Transfer' #转账
 REDENVELOPE = 'Redenvelope' #红包
-SYSTEMNOTIFICATION = 'Systemnotification'
+SYSTEMNOTIFICATION = 'Systemnotification' #系统消息
 UNDEFINED = 'Undefined' #未知消息类型
 
 INCOME_MSG = [TEXT, CARD, SHARING, PICTURE, EMOTICON, RECORDING, ATTACHMENT, WEBSHARE,
