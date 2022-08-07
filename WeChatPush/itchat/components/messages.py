@@ -87,11 +87,13 @@ def produce_msg(core, msgList):
         elif m.get('MsgType') == 37:
             msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
         else:
-            Chatroom = '{' + str(''.join(re.findall(r'\[\<ChatroomMember: \{(.*?)\}\>, <ChatroomMember:', str(m)))) + '}'
+            Chatroom = '{' + str(''.join(re.findall(r'\[\<ChatroomMember: \{(.*?)\}\>, \<ChatroomMember:', str(m)))) + '}'
             if Chatroom == '{}':
                 msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
                 msg['NickName'] = m.get('User').get('NickName')
             else:
+                if m.get('User').get('ChatRoomOwner') == m.get('ToUserName'):
+                    Chatroom = '{' + str(''.join(re.findall(r'\>, \<ChatroomMember: \{(.*?)\}\>\]\>', str(m)))) + '}'
                 ChatroomMember = eval(Chatroom.replace('<','\'').replace('>','\''))
                 msg['ChatRoom'] = 1
                 msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
