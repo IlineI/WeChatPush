@@ -58,7 +58,7 @@ def simple_reply(msg):
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
         if msg.get('Type') == 'Voip':
             if separate_push != 'false' and VoIP_regID != '':
-                requests.post(str(VoIP_interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0'}, verify=False)
+                requests.post(str(VoIP_interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
             else:
                 requests.post(str(chat_interface), params={'title': '微信 ' + str(msg.get('Name')), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
         else:
