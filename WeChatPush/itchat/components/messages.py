@@ -81,13 +81,21 @@ def produce_msg(core, msgList):
             # by default we think there may be a user missing not a mp
         m['User'].core = core
         msg = {}
+        msg['ChatRoom'] = 0
         if m.get('FromUserName') == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
         elif m.get('MsgType') == 37:
             msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
         else:
-            msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
-            msg['NickName'] = m.get('User').get('NickName')
+            Chatroom = '{' + str(''.join(re.findall(r'\[\<ChatroomMember: \{(.*?)\}\>, <ChatroomMember:', str(m)))) + '}'
+            if Chatroom == '{}':
+                msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
+                msg['NickName'] = m.get('User').get('NickName')
+            else:
+                ChatroomMember = eval(Chatroom.replace('<','\'').replace('>','\''))
+                msg['ChatRoom'] = 1
+                msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
+                msg['Name'] = ChatroomMember.get('NickName') if ChatroomMember.get('DisplayName') == '' else ChatroomMember.get('DisplayName')
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
                 msg['Type'] = 'Map'
@@ -147,8 +155,12 @@ def produce_msg(core, msgList):
         elif m.get('MsgType') == 51:  # phone init
             msg = update_local_uin(core, m)
         elif m.get('MsgType') == 10000:
-            if m.get('AppMsgType') == 0 and m.get('Content') == '收到红包，请在手机上查看':
+            if m.get('Content') == '收到红包，请在手机上查看':
                 msg['Type'] = 'Redenvelope'
+            elif m.get('Content') == '群收款消息，请在手机上查看':
+                msg['Type'] = 'Transfer'
+            elif m.get('Content') == '你的微信版本较低，升级微信体验多人语音通话。':
+                msg['Type'] = 'Voip'
             else:
                 msg['Type'] = 'Systemnotification'
         elif m.get('MsgType') == 10002:
