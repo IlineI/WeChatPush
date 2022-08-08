@@ -18,6 +18,3 @@ UOS_PATCH_EXTSPAM = 'Go8FCIkFEokFCggwMDAwMDAwMRAGGvAESySibk50w5Wb3uTl2c2h64jVVrV
 
 # if show self send mes
 SELF_MES = False
-
-PUSH_REGID = ''
-PHONE_TYPE = 0
