@@ -7,14 +7,12 @@ from datetime import datetime
 
 urllib3.disable_warnings()
 
-@itchat.msg_register([itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD,
-                        itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE,
-                        itchat.content.TEXT, itchat.content.FRIENDS, itchat.content.MUSICSHARE,
-                        itchat.content.UNDEFINED, itchat.content.PICTURE, itchat.content.RECORDING,
-                        itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
-                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING,
-                        itchat.content.REDENVELOPE, itchat.content.MINIPROGRAM, itchat.content.SYSTEMNOTIFICATION],
-                        isFriendChat=True, isGroupChat=True)
+@itchat.msg_register([itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.TEXT,
+                        itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD, itchat.content.SPLITTHEBILL,
+                        itchat.content.FRIENDS, itchat.content.MUSICSHARE, itchat.content.UNDEFINED, itchat.content.PICTURE,
+                        itchat.content.RECORDING, itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
+                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING, itchat.content.REDENVELOPE,
+                        itchat.content.MINIPROGRAM, itchat.content.SYSTEMNOTIFICATION], isFriendChat=True, isGroupChat=True)
 
 
 def simple_reply(msg):
@@ -46,6 +44,7 @@ def simple_reply(msg):
             itchat.content.REDENVELOPE: '[红包]',
             itchat.content.SHARING: '[分享]',
             itchat.content.EMOTICON: '[动画表情]',
+            itchat.content.SPLITTHEBILL: '[群收款]',
             itchat.content.VOIP: '[通话邀请]请及时打开微信查看',
             itchat.content.SYSTEMNOTIFICATION: '[系统通知]',
             itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
@@ -60,11 +59,11 @@ def simple_reply(msg):
         typesymbol = str(typesymbol) if msg.get('ChatRoom') == 0 else str(msg.get('Name')) + ': ' + str(typesymbol)
         if msg.get('Type') == 'Voip':
             if separate_push != 'false' and VoIP_regID != '':
-                requests.post(str(VoIP_interface), params={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
+                requests.post(str(VoIP_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
             else:
-                requests.post(str(chat_interface), params={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+                requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
         else:
-            requests.post(str(chat_interface), params={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+            requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(Name) + ': ' + str(typesymbol))
 
