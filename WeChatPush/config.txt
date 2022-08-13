@@ -9,7 +9,7 @@ separate_push = 'false'
 # 消息接收设置的别名
 chat_alias = ''
 # WirePusher里面获取的id
-wire_id = 'S3C8mpsGc'
+wire_id = ''
 
 # FarPush设置的regID，若separate_push为false则无需填写
 # 若separate_push不为false而此项未填写，则强制使用消息接收来接收通话邀请
