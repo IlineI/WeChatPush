@@ -1,9 +1,11 @@
 import itchat.content
+import urllib.request
 import requests
 import re
 import os
 from requests.packages import urllib3
 from datetime import datetime
+from urllib.request import quote, unquote
 
 urllib3.disable_warnings()
 
@@ -22,6 +24,8 @@ def simple_reply(msg):
             separate_push = str(''.join(re.findall(r'^separate_push = \'(.*?)\'', line)))
         elif (re.findall(r'^chat_alias = \'(.*?)\'', line)) != []:
             chat_alias = str(''.join(re.findall(r'^chat_alias = \'(.*?)\'', line)))
+        elif (re.findall(r'^wire_id = \'(.*?)\'', line)) != []:
+            wire_id = str(''.join(re.findall(r'^wire_id = \'(.*?)\'', line)))
         elif (re.findall(r'^VoIP_regID = \'(.*?)\'', line)) != []:
             VoIP_regID = str(''.join(re.findall(r'^VoIP_regID = \'(.*?)\'', line)))
         elif (''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) != '':
@@ -57,13 +61,21 @@ def simple_reply(msg):
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
         Name = msg.get('Name') if msg.get('ChatRoom') == 0 else '群聊 ' + msg.get('ChatRoomName')
         typesymbol = str(typesymbol) if msg.get('ChatRoom') == 0 else str(msg.get('Name')) + ': ' + str(typesymbol)
+        url ='https://wirepusher.com/send?id='+str(wire_id)+'&title=微信'+str(Name)+'&message='+str(typesymbol)+'&type=WeChat'+'&action=weixin://'
+        url = quote(url, safe=";/?:@&=+$,", encoding="utf-8")
         if msg.get('Type') == 'Voip':
             if separate_push != 'false' and VoIP_regID != '':
                 requests.post(str(VoIP_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
             else:
-                requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+                if str(chat_alias):
+                    requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+                elif str(wire_id):
+                    requests.post(url)
         else:
-            requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+            if str(chat_alias):
+                requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
+            elif str(wire_id):
+                requests.post(url)
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(Name) + ': ' + str(typesymbol))
 

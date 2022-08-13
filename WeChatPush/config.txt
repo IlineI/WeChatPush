@@ -5,8 +5,11 @@
 # 好处是可以将FarPush的通知声设置为电话铃声，起到强提醒的作用
 separate_push = 'false'
 
+# 只能填写其中一个，不然会出错(好像也可以同时使用
 # 消息接收设置的别名
 chat_alias = ''
+# WirePusher里面获取的id
+wire_id = ''
 
 # FarPush设置的regID，若separate_push为false则无需填写
 # 若separate_push不为false而此项未填写，则强制使用消息接收来接收通话邀请
