@@ -11,7 +11,7 @@ from datetime import datetime
 try:
     import config
 except:
-    print('配置文件异常,请检查配置文件是否存在或语法是否有问题')
+    print('配置获取异常,请检查配置文件是否存在或语法是否有问题')
     print('程序终止运行')
     os._exit(0)
 
@@ -50,7 +50,7 @@ def simple_reply(msg):
     try:
         importlib.reload(config)
     except:
-        print('配置文件读取异常,请检查配置文件是否存在或语法是否有问题')
+        print('配置获取异常,请检查配置文件是否存在或语法是否有问题')
         print('程序终止运行')
         os._exit(0)
     if str(msg.get('NickName')) not in config.blacklist:
