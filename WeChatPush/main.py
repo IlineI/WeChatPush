@@ -3,6 +3,8 @@ import requests
 import importlib
 import re
 import os
+import urllib.request
+from urllib.request import quote, unquote
 from requests.packages import urllib3
 from datetime import datetime
 
