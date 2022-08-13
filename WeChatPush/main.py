@@ -1,4 +1,5 @@
 import itchat.content
+import urllib.request
 import requests
 import re
 import os
@@ -62,7 +63,6 @@ def simple_reply(msg):
         typesymbol = str(typesymbol) if msg.get('ChatRoom') == 0 else str(msg.get('Name')) + ': ' + str(typesymbol)
         url ='https://wirepusher.com/send?id='+str(wire_id)+'&title=微信'+str(Name)+'&message='+str(typesymbol)+'&type=WeChat'+'&action=weixin://'
         url = quote(url, safe=";/?:@&=+$,", encoding="utf-8")
-        command= 'curl '+'\"'+str(url)+'\"'
         if msg.get('Type') == 'Voip':
             if separate_push != 'false' and VoIP_regID != '':
                 requests.post(str(VoIP_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
@@ -70,12 +70,12 @@ def simple_reply(msg):
                 if str(chat_alias):
                     requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
                 elif str(wire_id):
-                    os.system(str(command))
+                    requests.post(url)
         else:
             if str(chat_alias):
                 requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
             elif str(wire_id):
-                os.system(str(command))
+                requests.post(url)
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(Name) + ': ' + str(typesymbol))
 
