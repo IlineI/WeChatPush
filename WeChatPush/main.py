@@ -19,15 +19,12 @@ urllib3.disable_warnings()
 def simple_reply(msg):
     config = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/config.txt', 'r', encoding='utf-8')
     for line in config:
-        push_type='0'
         if (re.findall(r'^separate_push = \'(.*?)\'', line)) != []:
             separate_push = str(''.join(re.findall(r'^separate_push = \'(.*?)\'', line)))
         elif (re.findall(r'^chat_alias = \'(.*?)\'', line)) != []:
             chat_alias = str(''.join(re.findall(r'^chat_alias = \'(.*?)\'', line)))
-            push_type='mipush'
         elif (re.findall(r'^wire_id = \'(.*?)\'', line)) != []:
             wire_id = str(''.join(re.findall(r'^wire_id = \'(.*?)\'', line)))
-            push_type='wire'
         elif (re.findall(r'^VoIP_regID = \'(.*?)\'', line)) != []:
             VoIP_regID = str(''.join(re.findall(r'^VoIP_regID = \'(.*?)\'', line)))
         elif (''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) != '':
@@ -70,14 +67,14 @@ def simple_reply(msg):
             if separate_push != 'false' and VoIP_regID != '':
                 requests.post(str(VoIP_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
             else:
-                if push_type == 'mipush':
+                if str(chat_alias):
                     requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
-                elif push_type == 'wire':
+                elif str(wire_id):
                     os.system(str(command))
         else:
-            if push_type == 'mipush':
+            if str(chat_alias):
                 requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
-            elif push_type == 'wire':
+            elif str(wire_id):
                 os.system(str(command))
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(Name) + ': ' + str(typesymbol))
