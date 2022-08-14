@@ -33,7 +33,7 @@ blacklist = ['blacklist']
 # 旧接口，腾讯云，服务器在北京，延时低，无推送量限制，2023年2月起失效
 tdtt_interface = 'https://tdtt.top/send'
 # 新接口，Cloudflare平台，服务器在美国，延时高，日总推送量5万条，理论永久有效
-#chat_interface = 'https://send.tdtt.top'
+#tdtt_interface = 'https://send.tdtt.top'
 
 # FarPush的接口
 FarPush_interface = 'http://119.3.139.212:9090/PushWeChatMes'
