@@ -81,7 +81,7 @@ def simple_reply(msg):
             elif config.VoIP_push == '2' and config.FarPush_regID != '':
                 data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
             elif config.VoIP_push == '3' and config.WirePusher_ID != '':
-                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat', action='weixin://')
+                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_VoIP', action='weixin://')
             else:
                 print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
         else:
@@ -90,7 +90,7 @@ def simple_reply(msg):
             elif config.chat_push == '2' and config.FarPush_regID != '':
                 data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone='0', through='0')
             elif config.chat_push == '3' and config.WirePusher_ID != '':
-                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat', action='weixin://')
+                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_chat', action='weixin://')
             else:
                 print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
