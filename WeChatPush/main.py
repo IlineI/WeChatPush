@@ -1,13 +1,44 @@
 import itchat.content
-import urllib.request
 import requests
-import re
+import importlib
 import os
 from requests.packages import urllib3
 from datetime import datetime
-from urllib.request import quote, unquote
+
+
+try:
+    import config
+except:
+    print('配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+    print('程序终止运行')
+    os._exit(0)
+
 
 urllib3.disable_warnings()
+
+
+def data_send(url, **kwargs):
+    try:
+        response = requests.post(url, data=kwargs, timeout=5, verify=False)
+        if response.status_code > 299:
+            raise RuntimeError
+    except:
+        for i in range(1, 4):
+            print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 向接口发送数据超时/失败，第' + str(i) + '次重试')
+            try:
+                response = requests.post(url, data=kwargs, timeout=5, verify=False)
+                if response.status_code > 299:
+                    raise RuntimeError
+            except:
+                if str(i) == '3':
+                    print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 连续三次向接口发送数据超时/失败，可能是网络问题或接口失效，终止发送')
+                continue
+            else:
+                print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 成功向接口发送数据↓')
+                break
+    else:
+        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 成功向接口发送数据↓')
+
 
 @itchat.msg_register([itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.TEXT,
                         itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD, itchat.content.SPLITTHEBILL,
@@ -15,27 +46,14 @@ urllib3.disable_warnings()
                         itchat.content.RECORDING, itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
                         itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING, itchat.content.REDENVELOPE,
                         itchat.content.MINIPROGRAM, itchat.content.SYSTEMNOTIFICATION], isFriendChat=True, isGroupChat=True)
-
-
 def simple_reply(msg):
-    config = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/config.txt', 'r', encoding='utf-8')
-    for line in config:
-        if (re.findall(r'^separate_push = \'(.*?)\'', line)) != []:
-            separate_push = str(''.join(re.findall(r'^separate_push = \'(.*?)\'', line)))
-        elif (re.findall(r'^chat_alias = \'(.*?)\'', line)) != []:
-            chat_alias = str(''.join(re.findall(r'^chat_alias = \'(.*?)\'', line)))
-        elif (re.findall(r'^wire_id = \'(.*?)\'', line)) != []:
-            wire_id = str(''.join(re.findall(r'^wire_id = \'(.*?)\'', line)))
-        elif (re.findall(r'^VoIP_regID = \'(.*?)\'', line)) != []:
-            VoIP_regID = str(''.join(re.findall(r'^VoIP_regID = \'(.*?)\'', line)))
-        elif (''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) != '':
-            blacklist = '[' + str(''.join(re.findall(r'^blacklist = \[(.*?)\]', line))) + ']'
-        elif (re.findall(r'^chat_interface = \'(.*?)\'', line)) != []:
-            chat_interface = str(''.join(re.findall(r'^chat_interface = \'(.*?)\'', line)))
-        elif (re.findall(r'^VoIP_interface = \'(.*?)\'', line)) != []:
-            VoIP_interface = str(''.join(re.findall(r'^VoIP_interface = \'(.*?)\'', line)))
-    config.close()
-    if str(msg.get('NickName')) not in blacklist:
+    try:
+        importlib.reload(config)
+    except:
+        print('配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+        print('程序终止运行')
+        os._exit(0)
+    if str(msg.get('NickName')) not in config.blacklist:
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
             itchat.content.FRIENDS: '好友请求',
@@ -61,23 +79,27 @@ def simple_reply(msg):
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
         Name = msg.get('Name') if msg.get('ChatRoom') == 0 else '群聊 ' + msg.get('ChatRoomName')
         typesymbol = str(typesymbol) if msg.get('ChatRoom') == 0 else str(msg.get('Name')) + ': ' + str(typesymbol)
-        url ='https://wirepusher.com/send?id='+str(wire_id)+'&title=微信'+str(Name)+'&message='+str(typesymbol)+'&type=WeChat'+'&action=weixin://'
-        url = quote(url, safe=";/?:@&=+$,", encoding="utf-8")
         if msg.get('Type') == 'Voip':
-            if separate_push != 'false' and VoIP_regID != '':
-                requests.post(str(VoIP_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'regID': str(VoIP_regID), 'phone': '0', 'through': '0'}, verify=False)
+            if config.VoIP_push == '1' and config.tdtt_alias != '':
+                data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
+            elif config.VoIP_push == '2' and config.FarPush_regID != '':
+                data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
+            elif config.VoIP_push == '3' and config.WirePusher_ID != '':
+                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_VoIP', action='weixin://')
             else:
-                if str(chat_alias):
-                    requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
-                elif str(wire_id):
-                    requests.post(url)
+                print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
         else:
-            if str(chat_alias):
-                requests.post(str(chat_interface), data={'title': '微信 ' + str(Name), 'content': str(typesymbol), 'alias': str(chat_alias)}, verify=False)
-            elif str(wire_id):
-                requests.post(url)
+            if config.chat_push == '1' and config.tdtt_alias != '':
+                data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
+            elif config.chat_push == '2' and config.FarPush_regID != '':
+                data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone='0', through='0')
+            elif config.chat_push == '3' and config.WirePusher_ID != '':
+                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_chat', action='weixin://')
+            else:
+                print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
-        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' ' + str(Name) + ': ' + str(typesymbol))
+        print(str(Name) + ': ' + str(typesymbol))
+
 
 if __name__ == '__main__':
     itchat.check_login()

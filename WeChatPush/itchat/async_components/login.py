@@ -388,9 +388,12 @@ def get_msg(self):
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
         'User-Agent' : config.USER_AGENT }
-    r = self.s.post(url, data=json.dumps(data), headers=headers, timeout=config.TIMEOUT)
-    dic = json.loads(r.content.decode('utf-8', 'replace'))
-    if dic['BaseResponse']['Ret'] != 0: return None, None
+    try:
+        r = self.s.post(url, data=json.dumps(data), headers=headers, timeout=config.TIMEOUT)
+        dic = json.loads(r.content.decode('utf-8', 'replace'))
+    except:
+        time.sleep(0.5)
+    if dic.get('BaseResponse').get('Ret') != 0: return None, None
     self.loginInfo['SyncKey'] = dic['SyncKey']
     self.loginInfo['synckey'] = '|'.join(['%s_%s' % (item['Key'], item['Val'])
         for item in dic['SyncCheckKey']['List']])
