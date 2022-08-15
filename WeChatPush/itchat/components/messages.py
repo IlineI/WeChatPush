@@ -86,7 +86,7 @@ def produce_msg(core, msgList):
             msg['Name'] = msg['NickName'] = '微信团队'
         elif m.get('MsgType') == 37:
             msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
-        elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get(ToUserName')):
+        elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
             msg['ChatRoom'] = 1
             msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
             msg['Name'] = m.get('ActualNickName')
