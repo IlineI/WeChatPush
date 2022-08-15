@@ -5,6 +5,7 @@ import os
 from requests.packages import urllib3
 from datetime import datetime
 
+
 try:
     import config
 except:
@@ -12,7 +13,9 @@ except:
     print('程序终止运行')
     os._exit(0)
 
+
 urllib3.disable_warnings()
+
 
 def data_send(url, **kwargs):
     try:
@@ -35,6 +38,7 @@ def data_send(url, **kwargs):
                 break
     else:
         print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 成功向接口发送数据↓')
+
 
 @itchat.msg_register([itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.TEXT,
                         itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD, itchat.content.SPLITTHEBILL,
@@ -95,6 +99,7 @@ def simple_reply(msg):
                 print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
         typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
         print(str(Name) + ': ' + str(typesymbol))
+
 
 if __name__ == '__main__':
     itchat.check_login()
