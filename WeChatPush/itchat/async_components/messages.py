@@ -79,18 +79,13 @@ def produce_msg(core, msgList):
             msg['Name'] = msg['NickName'] = '微信团队'
         elif m.get('MsgType') == 37:
             msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
+        elif str(''.join(re.findall(r'^@@(.*?)', str(m.get('FromUserName'))))) != '':
+            msg['ChatRoom'] = 1
+            msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
+            msg['Name'] = m.get('ActualNickName')
         else:
-            Chatroom = '{' + str(''.join(re.findall(r'\[\<ChatroomMember: \{(.*?)\}\>, \<ChatroomMember:', str(m)))) + '}'
-            if Chatroom == '{}':
-                msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
-                msg['NickName'] = m.get('User').get('NickName')
-            else:
-                if m.get('User').get('ChatRoomOwner') == m.get('ToUserName'):
-                    Chatroom = '{' + str(''.join(re.findall(r'\>, \<ChatroomMember: \{(.*?)\}\>\]\>', str(m)))) + '}'
-                ChatroomMember = eval(Chatroom.replace('<','\'').replace('>','\''))
-                msg['ChatRoom'] = 1
-                msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
-                msg['Name'] = ChatroomMember.get('NickName') if ChatroomMember.get('DisplayName') == '' else ChatroomMember.get('DisplayName')
+            msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
+            msg['NickName'] = m.get('User').get('NickName')
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
                 msg['Type'] = 'Map'
