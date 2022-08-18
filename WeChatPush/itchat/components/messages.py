@@ -81,7 +81,7 @@ def produce_msg(core, msgList):
             # by default we think there may be a user missing not a mp
         m['User'].core = core
         msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
-        if m.getr(m.get('FromUserName')) == 'weixin':
+        if str(m.get('FromUserName')) == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
         elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
             msg['ChatRoom'] = '1'
