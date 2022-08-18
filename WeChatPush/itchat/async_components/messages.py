@@ -73,19 +73,20 @@ def produce_msg(core, msgList):
                         templates.User(userName=actualOpposite)
             # by default we think there may be a user missing not a mp
         m['User'].core = core
-        msg = {}
-        msg['ChatRoom'] = 0
+        msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
         if m.get('FromUserName') == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
         elif m.get('MsgType') == 37:
             msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
         elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
-            msg['ChatRoom'] = 1
+            msg['ChatRoom'] = '1'
             msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
             msg['Name'] = m.get('ActualNickName')
         else:
             msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
             msg['NickName'] = m.get('User').get('NickName')
+        if 499 < m.get('User').get('ContactFlag') < 600:
+            msg['NotifyCloseContact'] = '1'
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
                 msg['Type'] = 'Map'
