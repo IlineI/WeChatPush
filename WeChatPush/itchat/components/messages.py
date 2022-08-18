@@ -79,6 +79,7 @@ def produce_msg(core, msgList):
                         core.search_friends(userName=actualOpposite) or \
                         templates.User(userName=actualOpposite)
             # by default we think there may be a user missing not a mp
+        m['User'].core = core
         msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
         if m.get('FromUserName') == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
