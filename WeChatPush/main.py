@@ -79,7 +79,7 @@ def simple_reply(msg):
             print('[未知消息类型，请在github上提交issue]: MsgType=' + str(msg.get('Text')))
         else:
             print(str(Name) + ': ' + str(typesymbol))
-        if str(msg.get('Type')) == 'Voip':
+        if str(msg.get('Type')) == itchat.content.VOIP:
             if str(config.VoIP_push) == '1' and str(config.tdtt_alias) != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
             elif str(config.VoIP_push) == '2' and str(config.FarPush_regID) != '':
