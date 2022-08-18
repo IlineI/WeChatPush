@@ -9,7 +9,7 @@ from datetime import datetime
 try:
     import config
 except:
-    print('配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+    print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
     print('程序终止运行')
     os._exit(0)
 
@@ -25,11 +25,11 @@ def data_send(url, **kwargs):
                 raise RuntimeError
         except:
             if str(i) == '4':
-                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '连续三次向接口发送数据超时/失败，可能是网络问题或接口失效，终止发送')
+                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '连续三次向接口发送数据超时/失败，可能是网络问题或接口失效，终止发送')
                 break
-            print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '向接口发送数据超时/失败，第' + str(i) + '次重试')
+            print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '向接口发送数据超时/失败，第' + str(i) + '次重试')
         else:
-            print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '成功向接口发送数据↑')
+            print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '成功向接口发送数据↑')
             break
 
 
@@ -43,7 +43,7 @@ def simple_reply(msg):
     try:
         importlib.reload(config)
     except:
-        print('配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+        print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
         print('程序终止运行')
         os._exit(0)
     if str(msg.get('NickName')) not in config.blacklist:
@@ -85,7 +85,7 @@ def simple_reply(msg):
             elif config.VoIP_push == '3' and config.WirePusher_ID != '':
                 data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_VoIP', action='weixin://')
             else:
-                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '配置有误，请更改配置')
+                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置有误，请更改配置')
         else:
             if config.chat_push == '1' and config.tdtt_alias != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
@@ -94,7 +94,7 @@ def simple_reply(msg):
             elif config.chat_push == '3' and config.WirePusher_ID != '':
                 data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_chat', action='weixin://')
             else:
-                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '配置有误，请更改配置')
+                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置有误，请更改配置')
 
 
 if __name__ == '__main__':
