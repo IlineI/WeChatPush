@@ -18,26 +18,19 @@ urllib3.disable_warnings()
 
 
 def data_send(url, **kwargs):
-    try:
-        response = requests.post(url, data=kwargs, timeout=5, verify=False)
-        if response.status_code > 299:
-            raise RuntimeError
-    except:
-        for i in range(1, 4):
-            print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 向接口发送数据超时/失败，第' + str(i) + '次重试')
-            try:
-                response = requests.post(url, data=kwargs, timeout=5, verify=False)
-                if response.status_code > 299:
-                    raise RuntimeError
-            except:
-                if str(i) == '3':
-                    print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 连续三次向接口发送数据超时/失败，可能是网络问题或接口失效，终止发送')
-                continue
-            else:
-                print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 成功向接口发送数据↓')
+    for i in range(1, 5):
+        try:
+            response = requests.post(url, data=kwargs, timeout=5, verify=False)
+            if response.status_code > 299:
+                raise RuntimeError
+        except:
+            if str(i) == '4':
+                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '连续三次向接口发送数据超时/失败，可能是网络问题或接口失效，终止发送')
                 break
-    else:
-        print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 成功向接口发送数据↓')
+            print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '向接口发送数据超时/失败，第' + str(i) + '次重试')
+        else:
+            print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '成功向接口发送数据↑')
+            break
 
 
 @itchat.msg_register([itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.TEXT,
@@ -78,7 +71,12 @@ def simple_reply(msg):
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')),
             itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
         Name = msg.get('Name') if msg.get('ChatRoom') == 0 else '群聊 ' + msg.get('ChatRoomName')
-        typesymbol = str(typesymbol) if msg.get('ChatRoom') == 0 else str(msg.get('Name')) + ': ' + str(typesymbol)
+        if msg.get('ChatRoom') == 1:
+            typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
+        if msg.get('Type') == 'Sharing':
+            print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
+        else:
+            print(str(Name) + ': ' + str(typesymbol))
         if msg.get('Type') == 'Voip':
             if config.VoIP_push == '1' and config.tdtt_alias != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
@@ -87,18 +85,16 @@ def simple_reply(msg):
             elif config.VoIP_push == '3' and config.WirePusher_ID != '':
                 data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_VoIP', action='weixin://')
             else:
-                print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
+                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '配置有误，请更改配置')
         else:
             if config.chat_push == '1' and config.tdtt_alias != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
             elif config.chat_push == '2' and config.FarPush_regID != '':
-                data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone='0', through='0')
+                data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
             elif config.chat_push == '3' and config.WirePusher_ID != '':
                 data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_chat', action='weixin://')
             else:
-                print(datetime.now().strftime('%Y.%m.%d %H:%M:%S') + ' 配置有误，请更改配置')
-        typesymbol = '[未知卡片消息]: AppMsgType=' + str(msg.get('Text')) if msg.get('Type') == 'Sharing' else typesymbol
-        print(str(Name) + ': ' + str(typesymbol))
+                print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S]') + '配置有误，请更改配置')
 
 
 if __name__ == '__main__':
