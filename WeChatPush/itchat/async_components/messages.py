@@ -74,10 +74,8 @@ def produce_msg(core, msgList):
             # by default we think there may be a user missing not a mp
         m['User'].core = core
         msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
-        if m.get('FromUserName') == 'weixin':
+        if str(m.get('FromUserName')) == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
-        elif m.get('MsgType') == 37:
-            msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
         elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
             msg['ChatRoom'] = '1'
             msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
@@ -85,7 +83,8 @@ def produce_msg(core, msgList):
         else:
             msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
             msg['NickName'] = m.get('User').get('NickName')
-        if 'ContactFlag' in m.get('User') and m.get('User').get('ContactFlag') != '' and 499 < m.get('User').get('ContactFlag') < 600:
+        if ('ContactFlag' in m.get('User') and str(m.get('User').get('ContactFlag')) != ''
+            and ( 511 < int(m.get('User').get('ContactFlag')) < 1024 or int(m.get('User').get('ContactFlag')) > 2559 )):
             msg['NotifyCloseContact'] = '1'
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
@@ -99,6 +98,7 @@ def produce_msg(core, msgList):
         elif m.get('MsgType') == 34:  # voice
             msg['Type'] = 'Recording'
         elif m.get('MsgType') == 37:  # friends
+            msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
             msg['Type'] = 'Friends'
         elif m.get('MsgType') == 42:  # name card
             msg['Type'] = 'Card'
