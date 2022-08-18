@@ -73,13 +73,13 @@ def simple_reply(msg):
         Name = str(msg.get('Name')) if str(msg.get('ChatRoom')) == '0' else '群聊 ' + str(msg.get('ChatRoomName'))
         if str(msg.get('ChatRoom')) == '1':
             typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
-        if str(msg.get('Type')) == itchat.content.SHARING:
+        if str(msg.get('Type')) == str(itchat.content.SHARING):
             print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
-        elif str(msg.get('Type')) == itchat.content.UNDEFINED:
+        elif str(msg.get('Type')) == str(itchat.content.UNDEFINED):
             print('[未知消息类型，请在github上提交issue]: MsgType=' + str(msg.get('Text')))
         else:
             print(str(Name) + ': ' + str(typesymbol))
-        if str(msg.get('Type')) == itchat.content.VOIP:
+        if str(msg.get('Type')) == str(itchat.content.VOIP):
             if str(config.VoIP_push) == '1' and str(config.tdtt_alias) != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
             elif str(config.VoIP_push) == '2' and str(config.FarPush_regID) != '':
