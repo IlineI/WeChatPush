@@ -46,7 +46,7 @@ def simple_reply(msg):
         print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
         print('程序终止运行')
         os._exit(0)
-    if str(msg.get('NickName')) not in config.blacklist:
+    if str(msg.get('NickName')) not in config.blacklist and str(msg.get('NotifyCloseContact')) == '0':
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
             itchat.content.FRIENDS: '好友请求',
