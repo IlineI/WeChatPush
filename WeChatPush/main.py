@@ -70,30 +70,30 @@ def simple_reply(msg):
             itchat.content.MAP: '[位置分享]' + str(msg.get('Text')),
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')) }.get(msg['Type'])
-        Name = msg.get('Name') if msg.get('ChatRoom') == 0 else '群聊 ' + msg.get('ChatRoomName')
-        if msg.get('ChatRoom') == 1:
+        Name = str(msg.get('Name')) if str(msg.get('ChatRoom')) == '0' else '群聊 ' + str(msg.get('ChatRoomName'))
+        if str(msg.get('ChatRoom')) == '1':
             typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
-        if msg.get('Type') == itchat.content.SHARING:
+        if str(msg.get('Type')) == itchat.content.SHARING:
             print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
-        elif  msg.get('Type') == itchat.content.UNDEFINED:
+        elif str(msg.get('Type')) == itchat.content.UNDEFINED:
             print('[未知消息类型，请在github上提交issue]: MsgType=' + str(msg.get('Text')))
         else:
             print(str(Name) + ': ' + str(typesymbol))
-        if msg.get('Type') == 'Voip':
-            if config.VoIP_push == '1' and config.tdtt_alias != '':
+        if str(msg.get('Type')) == 'Voip':
+            if str(config.VoIP_push) == '1' and str(config.tdtt_alias) != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
-            elif config.VoIP_push == '2' and config.FarPush_regID != '':
+            elif str(config.VoIP_push) == '2' and str(config.FarPush_regID) != '':
                 data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
-            elif config.VoIP_push == '3' and config.WirePusher_ID != '':
+            elif str(config.VoIP_push) == '3' and str(config.WirePusher_ID) != '':
                 data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_VoIP', action='weixin://')
             else:
                 print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置有误，请更改配置')
         else:
-            if config.chat_push == '1' and config.tdtt_alias != '':
+            if str(config.chat_push) == '1' and str(config.tdtt_alias) != '':
                 data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
-            elif config.chat_push == '2' and config.FarPush_regID != '':
+            elif str(config.chat_push) == '2' and str(config.FarPush_regID) != '':
                 data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
-            elif config.chat_push == '3' and config.WirePusher_ID != '':
+            elif str(config.chat_push) == '3' and str(config.WirePusher_ID) != '':
                 data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_chat', action='weixin://')
             else:
                 print(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ') + '配置有误，请更改配置')
