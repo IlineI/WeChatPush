@@ -81,10 +81,8 @@ def produce_msg(core, msgList):
             # by default we think there may be a user missing not a mp
         m['User'].core = core
         msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
-        if m.get('FromUserName') == 'weixin':
+        if m.getr(m.get('FromUserName')) == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
-        elif m.get('MsgType') == 37:
-            msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
         elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
             msg['ChatRoom'] = '1'
             msg['NickName'] = msg['ChatRoomName'] = m.get('User').get('NickName')
@@ -107,6 +105,7 @@ def produce_msg(core, msgList):
         elif m.get('MsgType') == 34:  # voice
             msg['Type'] = 'Recording'
         elif m.get('MsgType') == 37:  # friends
+            msg['Name'] = msg['NickName'] = m.get('RecommendInfo').get('NickName')
             msg['Type'] = 'Friends'
         elif m.get('MsgType') == 42:  # name card
             msg['Type'] = 'Card'
