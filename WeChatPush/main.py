@@ -57,9 +57,10 @@ def simple_reply(msg):
             itchat.content.CHATHISTORY: '[聊天记录]',
             itchat.content.TRANSFER: '[转账]',
             itchat.content.REDENVELOPE: '[红包]',
-            itchat.content.SHARING: '[分享]',
             itchat.content.EMOTICON: '[动画表情]',
             itchat.content.SPLITTHEBILL: '[群收款]',
+            itchat.content.SHARING: '[未知卡片消息]',
+            itchat.content.UNDEFINED: '[未知消息类型]',
             itchat.content.VOIP: '[通话邀请]请及时打开微信查看',
             itchat.content.SYSTEMNOTIFICATION: '[系统通知]',
             itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
@@ -68,13 +69,14 @@ def simple_reply(msg):
             itchat.content.SERVICENOTIFICATION: str(msg.get('Text')),
             itchat.content.MAP: '[位置分享]' + str(msg.get('Text')),
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
-            itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')),
-            itchat.content.UNDEFINED: '[未知消息类型]: MsgType=' + str(msg.get('Text')) }.get(msg['Type'])
+            itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')) }.get(msg['Type'])
         Name = msg.get('Name') if msg.get('ChatRoom') == 0 else '群聊 ' + msg.get('ChatRoomName')
         if msg.get('ChatRoom') == 1:
             typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
-        if msg.get('Type') == 'Sharing':
+        if msg.get('Type') == itchat.content.SHARING:
             print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
+        elif  msg.get('Type') == itchat.content.UNDEFINED:
+            print('[未知消息类型，请在github上提交issue]: MsgType=' + str(msg.get('Text')))
         else:
             print(str(Name) + ': ' + str(typesymbol))
         if msg.get('Type') == 'Voip':
