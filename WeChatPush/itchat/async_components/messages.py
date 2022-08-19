@@ -48,6 +48,7 @@ async def get_download_fn(core, url, msgId):
 
 def produce_msg(core, msgList):
     rl = []
+    msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
     for m in msgList:
         # get actual opposite
         if m.get('FromUserName') == core.storageClass.userName:
@@ -72,8 +73,7 @@ def produce_msg(core, msgList):
                         core.search_friends(userName=actualOpposite) or \
                         templates.User(userName=actualOpposite)
             # by default we think there may be a user missing not a mp
-        m['User'].core = core
-        msg = {'ChatRoom': '0', 'NotifyCloseContact': '0'}
+        m['User'].core = core     
         if str(m.get('FromUserName')) == 'weixin':
             msg['Name'] = msg['NickName'] = '微信团队'
         elif '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
@@ -83,9 +83,13 @@ def produce_msg(core, msgList):
         else:
             msg['Name'] = m.get('User').get('NickName') if m.get('User').get('RemarkName') == '' else m.get('User').get('RemarkName')
             msg['NickName'] = m.get('User').get('NickName')
-        if ('ContactFlag' in m.get('User') and str(m.get('User').get('ContactFlag')) != ''
-            and ( 511 < int(m.get('User').get('ContactFlag')) < 1024 or int(m.get('User').get('ContactFlag')) > 2559 )):
-            msg['NotifyCloseContact'] = '1'
+        if '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
+            if str(m.get('User').get('Statues')) == '0':
+                msg['NotifyCloseContact'] = '1'
+        else:
+            if ('ContactFlag' in m.get('User') and str(m.get('User').get('ContactFlag')) != ''
+                and ( 511 < int(m.get('User').get('ContactFlag')) < 1024 or int(m.get('User').get('ContactFlag')) > 2559 )):
+                msg['NotifyCloseContact'] = '1'
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
                 msg['Type'] = 'Map'
