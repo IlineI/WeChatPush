@@ -30,7 +30,8 @@ FarPush_Phone_Type = '0'
 # 可以是好友昵称或原群名，不是好友备注或群备注，理论上可以按照格式无限添加
 # 例如blacklist = ['相亲相爱一家人', '法外狂徒张三', '...']
 blacklist = ['blacklist']
-
+# 设置群消息白名单，当whitelist不为空时，黑名单设置无效，只有白名单中的群消息可以收到通知（好友均可收到消息）
+whitelist = []
 # 消息接收的接口
 # 旧接口，腾讯云，服务器在北京，延时低，无推送量限制，2023年2月起失效
 tdtt_interface = 'https://tdtt.top/send'
