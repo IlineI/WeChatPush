@@ -7,13 +7,6 @@ from requests.packages import urllib3
 from datetime import datetime
 from multiprocessing import Pool, Manager
 
-try:
-    import config
-except:
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-    print('程序终止运行')
-    os._exit(0)
-
 
 def config_update(value):
     while 1:
@@ -53,6 +46,7 @@ def config_update(value):
 def forcequit(msg):
     print('发生错误，程序强制停止运行')
     os._exit(0)
+
 
 def data_send(url, **kwargs):
     for i in range(1, 5):
@@ -137,6 +131,12 @@ def simple_reply(msg):
 
 
 if __name__ == '__main__':
+    try:
+        import config
+    except:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+        print('程序终止运行')
+        os._exit(0)
     urllib3.disable_warnings()
     value = Manager().dict()
     value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
