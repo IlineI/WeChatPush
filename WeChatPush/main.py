@@ -46,7 +46,16 @@ def simple_reply(msg):
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
         print('程序终止运行')
         os._exit(0)
-    if str(msg.get('NickName')) not in list(config.blacklist) and str(msg.get('NotifyCloseContact')) == '0':
+    notify = True if str(msg.get('ChatRoom')) == '0' else False # 好友消息放行，拦截群消息
+    if config.whitelist: # 白名单群消息放行
+        if str(msg.get('NickName')) in list(config.whitelist):
+            notify = True
+    else: # 没有开启白名单，放行未加入黑名单的群消息
+        if str(msg.get('NickName')) not in list(config.blacklist):
+            notify = True
+        else:
+            notify = False # 拦截黑名单好友消息
+    if notify and str(msg.get('NotifyCloseContact')) == '0':
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
             itchat.content.FRIENDS: '好友请求',
@@ -100,6 +109,10 @@ def simple_reply(msg):
 
 
 if __name__ == '__main__':
+    if(config.whitelist):
+        print('[白名单] ' + str(config.whitelist))
+    else:
+        print('[黑名单] ' + str(config.blacklist))
     itchat.check_login()
     itchat.auto_login(hotReload=True, enableCmdQR=2)
     itchat.run()
