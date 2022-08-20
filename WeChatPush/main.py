@@ -79,9 +79,9 @@ def data_send(url, **kwargs):
 def simple_reply(msg):
     notify = 0
     if int(value.get('shield_mode')):
-        if not int(msg.get('ChatRoom')) or str(msg.get('NickName')) in list(whitelist): # 白名单模式，白名单群消息放行
+        if not int(msg.get('ChatRoom')) or str(msg.get('NickName')) in list(value.get('whitelist')): # 白名单模式，白名单群消息放行
             notify = 1
-    elif str(msg.get('NickName')) not in list(blacklist):
+    elif str(msg.get('NickName')) not in list(value.get('blacklist')):
         notify =  1
     if int(notify) and not int(msg.get('NotifyCloseContact')):
         typesymbol = {
