@@ -10,8 +10,6 @@
 chat_push = '1'
 # 通话邀请推送途径
 VoIP_push = '1'
-# 理论MiPush也支持点击通知跳转，但需要开发者在接口服务器中将extra.notify_effect设为3，并获取POST或GET的extra.web_uri参数
-# 但目前1、2接口并没有适配，所以无法跳转
 
 # 以下三项请根据上述两项的值选择性填写
 # 消息接收设置的别名
