@@ -105,10 +105,10 @@ def simple_reply(msg):
 
 
 if __name__ == '__main__':
+    itchat.check_login()
+    itchat.auto_login(hotReload=True, enableCmdQR=2)
     if int(config.shield_mode):
         print('[白名单模式] 群聊' + str(config.whitelist) + '以及好友私聊的消息将会放行')
     else:
         print('[黑名单模式] 群聊/好友' + str(config.blacklist) + '的消息将不会放行')
-    itchat.check_login()
-    itchat.auto_login(hotReload=True, enableCmdQR=2)
     itchat.run()
