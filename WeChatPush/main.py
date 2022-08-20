@@ -14,9 +14,9 @@ except:
     print('程序终止运行')
     os._exit(0)
 
-shieldmode = str(config.shield_mode)
-white = str(config.whitelist)
-black = str(config.blacklist)
+shield_mode = str(config.shield_mode)
+whitelist = str(config.whitelist)
+blacklist = str(config.blacklist)
 
 urllib3.disable_warnings()
 
@@ -29,25 +29,25 @@ def config_update():
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
             print('程序终止运行')
             break
-        global shieldmode,white,black
-        shieldmode_update = '0'
-        if str(config.shield_mode) != shieldmode:
+        global shield_mode,whitelist,blacklist
+        shield_mode_update = '0'
+        if str(config.shield_mode) != shield_mode:
             if int(config.shield_mode):
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(config.whitelist) + '以及非群聊的消息将会推送')
             else:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(config.blacklist) + '的消息将不会推送')
-            shieldmode = str(config.shield_mode)
-            shieldmode_update = '1'
-        if int(shieldmode_update):
-            white = str(config.whitelist)
-            black = str(config.blacklist)
+            shield_mode = str(config.shield_mode)
+            shield_mode_update = '1'
+        if int(shield_mode_update):
+            whitelist = str(config.whitelist)
+            blacklist = str(config.blacklist)
         else:
-            if str(config.whitelist) != white and int(config.shield_mode):
+            if str(config.whitelist) != whitelist and int(config.shield_mode):
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(config.whitelist) + '以及非群聊的消息将会推送')
-                white = str(config.whitelist)
-            elif str(config.blacklist) != black and not int(config.shield_mode):
+                whitelist = str(config.whitelist)
+            elif str(config.blacklist) != blacklist and not int(config.shield_mode):
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(config.blacklist) + '的消息将不会推送')
-                black = str(config.blacklist)
+                blacklist = str(config.blacklist)
         time.sleep(1)
 
 
