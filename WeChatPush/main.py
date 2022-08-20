@@ -46,7 +46,12 @@ def simple_reply(msg):
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
         print('程序终止运行')
         os._exit(0)
-    if str(msg.get('NickName')) not in list(config.blacklist) and str(msg.get('NotifyCloseContact')) == '0':
+    if int(config.shield_mode):
+        if not int(msg.get('ChatRoom')) or str(msg.get('NickName')) in list(config.whitelist): # 白名单模式，白名单群消息放行
+            notify = True
+    else: # 黑名单模式，放行未加入黑名单的消息
+        notify = True if str(msg.get('NickName')) not in list(config.blacklist) else False
+    if notify and not int(msg.get('NotifyCloseContact')):
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
             itchat.content.FRIENDS: '好友请求',
@@ -71,7 +76,7 @@ def simple_reply(msg):
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')) }.get(msg['Type'])
         Name = str(msg.get('Name')) if str(msg.get('ChatRoom')) == '0' else '群聊 ' + str(msg.get('ChatRoomName'))
-        if str(msg.get('ChatRoom')) == '1':
+        if int(msg.get('ChatRoom')):
             typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
         if str(msg.get('Type')) == str(itchat.content.SHARING):
             print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
@@ -100,6 +105,10 @@ def simple_reply(msg):
 
 
 if __name__ == '__main__':
+    if config.whitelist:
+        print('[白名单模式] 群聊' + str(config.whitelist) + '以及好友私聊的消息将会放行')
+    else:
+        print('[黑名单模式] 群聊/好友' + str(config.blacklist) + '的消息将不会放行')
     itchat.check_login()
     itchat.auto_login(hotReload=True, enableCmdQR=2)
     itchat.run()
