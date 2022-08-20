@@ -23,77 +23,30 @@ def config_update(value, blacklist, whitelist):
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
             print('程序终止运行')
             break
-        oldblacklen = len(blacklist)
-        oldwhitelen = len(whitelist)
-        newblacklen = len(list(config.blacklist))
-        newwhitelen = len(list(config.whitelist))
         shield_mode_update = '0'
-        if str(config.shield_mode) != value.get('shield_mode'):
-            if int(config.shield_mode):
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(config.whitelist) + '以及非群聊的消息将会推送')
-            else:
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(config.blacklist) + '的消息将不会推送')
-            value['shield_mode'] = str(config.shield_mode)
-            shield_mode_update = '1'
-        if int(shield_mode_update):
-            if int(newwhitelen) == int(oldwhitelen):
-                for i in range(0, int(newwhitelen)):
-                    whitelist[i] = list(config.whitelist)[i]
-            elif int(newwhitelen) < int(oldwhitelen):
-                for i in range(0, int(newwhitelen)):
-                    whitelist[i] = list(config.whitelist)[i]
-                del whitelist[int(newwhitelen):]
-            elif int(newwhitelen) > int(oldwhitelen):
-                for i in range(0, int(oldwhitelen)):
-                    whitelist[i] = list(config.whitelist)[i]
-                whitelist.extend(list(config.whitelist)[int(oldwhitelen):])
-            if int(newblacklen) == int(oldblacklen):
-                for i in range(0, int(newblacklen)):
-                    blacklist[i] = list(config.blacklist)[i]
-            elif int(newblacklen) < int(oldblacklen):
-                for i in range(0, int(newblacklen)):
-                    blacklist[i] = list(config.blacklist)[i]
-                del blacklist[int(newblacklen):]
-            elif int(newblacklen) > int(oldblacklen):
-                for i in range(0, int(oldblacklen)):
-                    blacklist[i] = list(config.blacklist)[i]
-                blacklist.extend(list(config.blacklist)[int(oldblacklen):])
-        else:
-            if list(config.whitelist) != list(whitelist) and int(config.shield_mode):
-                if int(newwhitelen) == int(oldwhitelen):
-                    for i in range(0, int(newwhitelen)):
-                        whitelist[i] = list(config.whitelist)[i]
-                elif int(newwhitelen) < int(oldwhitelen):
-                    for i in range(0, int(newwhitelen)):
-                        whitelist[i] = list(config.whitelist)[i]
-                    del whitelist[int(newwhitelen):]
-                elif int(newwhitelen) > int(oldwhitelen):
-                    for i in range(0, int(oldwhitelen)):
-                        whitelist[i] = list(config.whitelist)[i]
-                    whitelist.extend(list(config.whitelist)[int(oldwhitelen):])
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(whitelist) + '以及非群聊的消息将会推送')
-            elif list(config.blacklist) != list(blacklist) and not int(config.shield_mode):
-                if int(newblacklen) == int(oldblacklen):
-                    for i in range(0, int(newblacklen)):
-                        blacklist[i] = list(config.blacklist)[i]
-                elif int(newblacklen) < int(oldblacklen):
-                    for i in range(0, int(newblacklen)):
-                        blacklist[i] = list(config.blacklist)[i]
-                    del blacklist[int(newblacklen):]
-                elif int(newblacklen) > int(oldblacklen):
-                    for i in range(0, int(oldblacklen)):
-                        blacklist[i] = list(config.blacklist)[i]
-                    blacklist.extend(list(config.blacklist)[int(oldblacklen):])
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(blacklist) + '的消息将不会推送')
         newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
-                'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
-                'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
-                'shield_mode': str(config.shield_mode), 'tdtt_interface': str(config.tdtt_interface), 
-                'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
+                    'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                    'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                    'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                    'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                    'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
         for a in value.keys():
-            if str(value.get(a)) != str(newcfg.get(a)):
-                value.update({a: str(newcfg.get(a))})
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + value.get(a))
+            if str(a) == 'shield_mode':
+                if newcfg.get('shield_mode') != value.get('shield_mode'):
+                    if int(newcfg.get('shield_mode')):
+                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(newcfg.get('whitelist')) + '以及非群聊的消息将会推送')
+                    else:
+                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(newcfg.get('blacklist')) + '的消息将不会推送')
+                    shield_mode_update = '1'
+            elif str(a) == 'whitelist':
+                if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
+            elif str(a) == 'blacklist':
+                if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
+            elif str(value.get(a)) != str(newcfg.get(a)):
+                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + newcfg.get(a))
+        value.update(newcfg)
         time.sleep(1)
 
 
@@ -186,13 +139,12 @@ def simple_reply(msg):
 if __name__ == '__main__':
     urllib3.disable_warnings()
     value = Manager().dict()
-    blacklist = Manager().list(list(config.blacklist))
-    whitelist = Manager().list(list(config.whitelist))
     value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
-                'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
-                'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
-                'shield_mode': str(config.shield_mode), 'tdtt_interface': str(config.tdtt_interface), 
-                'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
+                    'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                    'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                    'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                    'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                    'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
     itchat.check_login()
     itchat.auto_login(hotReload=True, enableCmdQR=2)
     if int(value.get('shield_mode')):
