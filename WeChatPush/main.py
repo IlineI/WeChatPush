@@ -15,7 +15,7 @@ except:
     os._exit(0)
 
 
-def config_update(value, blacklist, whitelist):
+def config_update(value):
     while 1:
         try:
             importlib.reload(config)
@@ -148,10 +148,10 @@ if __name__ == '__main__':
     itchat.check_login()
     itchat.auto_login(hotReload=True, enableCmdQR=2)
     if int(value.get('shield_mode')):
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(whitelist) + '以及非群聊的消息将会推送')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
     else:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(blacklist) + '的消息将不会推送')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
     pool = Pool(processes = 1)
-    pool.apply_async(config_update, args=(value, blacklist, whitelist, ), callback=forcequit, error_callback=forcequit)
+    pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
     pool.close()
     itchat.run()
