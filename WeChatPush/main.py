@@ -50,7 +50,7 @@ def simple_reply(msg):
         if not int(msg.get('ChatRoom')) or str(msg.get('NickName')) in list(config.whitelist): # 白名单模式，白名单群消息放行
             notify = True
     else: # 黑名单模式，放行未加入黑名单的消息
-        notify = True if str(msg.get('NickName')) not in list(config.blacklist) else False
+        notify = False if str(msg.get('NickName')) in list(config.blacklist) else True
     if notify and not int(msg.get('NotifyCloseContact')):
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
@@ -105,7 +105,7 @@ def simple_reply(msg):
 
 
 if __name__ == '__main__':
-    if config.whitelist:
+    if int(config.shield_mode):
         print('[白名单模式] 群聊' + str(config.whitelist) + '以及好友私聊的消息将会放行')
     else:
         print('[黑名单模式] 群聊/好友' + str(config.blacklist) + '的消息将不会放行')
