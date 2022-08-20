@@ -2,7 +2,6 @@ import itchat.content
 import requests
 import importlib
 import time
-import sys
 import os
 from requests.packages import urllib3
 from datetime import datetime
