@@ -86,10 +86,9 @@ def produce_msg(core, msgList):
         if '@@' in str(m.get('FromUserName')) or '@@' in str(m.get('ToUserName')):
             if str(m.get('User').get('Statues')) == '0':
                 msg['NotifyCloseContact'] = '1'
-        else:
-            if ('ContactFlag' in m.get('User') and str(m.get('User').get('ContactFlag')) != ''
-                and ( 511 < int(m.get('User').get('ContactFlag')) < 1024 or int(m.get('User').get('ContactFlag')) > 2559 )):
-                msg['NotifyCloseContact'] = '1'
+        if ('ContactFlag' in m.get('User') and str(m.get('User').get('ContactFlag')) != ''
+            and ( 511 < int(m.get('User').get('ContactFlag')) < 1024 or int(m.get('User').get('ContactFlag')) > 2559 )):
+            msg['NotifyCloseContact'] = '1'
         if m.get('MsgType') == 1:  # words
             if m.get('Url'):
                 msg['Type'] = 'Map'
