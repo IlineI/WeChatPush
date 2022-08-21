@@ -125,7 +125,7 @@ def simple_reply(msg):
             elif str(value.get('chat_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('chat_push')) == '3' and str(value.get('WirePusher_ID')) != '':
-                data_send(str(value.get('WirePusher_interface')), title='微信 ' + str(Name), message=str(typesymbol), id=str(value.get('WirePusher_ID')), type='WeChat_VoIP', action='weixin://')
+                data_send(str(value.get('WirePusher_interface')), title='微信 ' + str(Name), message=str(typesymbol), id=str(value.get('WirePusher_ID')), type='WeChat_chat', action='weixin://')
             else:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
 
