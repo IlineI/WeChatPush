@@ -9,7 +9,7 @@ ASYNC_COMPONENTS = os.environ.get('ITCHAT_UOS_ASYNC', False)
 BASE_URL = 'http://login.weixin.qq.com'
 OS = platform.system()  # Windows, Linux, Darwin
 DIR = os.getcwd()
-DEFAULT_QR = str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + 'QR.png'
+DEFAULT_QR = str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')) + '/QR.png'
 TIMEOUT = (10, 60)
 
 USER_AGENTS = ['Mozilla/5.0 (Macintosh) AppleWebKit/34.7 (KHTML, like Gecko) Firefox/47.0 Safari/174.10',
