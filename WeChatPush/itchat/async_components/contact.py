@@ -1,7 +1,7 @@
 import time, re, io
 import json, copy
 import logging
-
+from datetime import datetime
 from .. import config, utils
 from ..components.contact import accept_friend
 from ..returnvalues import ReturnValue
@@ -219,10 +219,10 @@ def update_local_uin(core, msg):
                     if userDicts.get('Uin', 0) == 0:
                         userDicts['Uin'] = uin
                         usernameChangedList.append(username)
-                        logger.debug('Uin fetched: %s, %s' % (username, uin))
+                        logger.debug('已获取Uin: %s, %s' % (username, uin))
                     else:
                         if userDicts['Uin'] != uin:
-                            logger.debug('Uin changed: %s, %s' % (
+                            logger.debug('Uin发生改变: %s, %s' % (
                                 userDicts['Uin'], uin))
                 else:
                     if '@@' in username:
@@ -253,12 +253,12 @@ def update_local_uin(core, msg):
                         else:
                             newFriendDict['Uin'] = uin
                     usernameChangedList.append(username)
-                    logger.debug('Uin fetched: %s, %s' % (username, uin))
+                    logger.debug('已获取Uin: %s, %s' % (username, uin))
         else:
-            logger.debug('Wrong length of uins & usernames: %s, %s' % (
+            logger.debug('uin或用户名的长度错误: %s, %s' % (
                 len(uins), len(usernames)))
     else:
-        logger.debug('No uins in 51 message')
+        logger.debug('没有找到uin')
         logger.debug(msg['Content'])
     return r
 
@@ -274,7 +274,7 @@ def get_contact(self, update=False):
         try:
             r = self.s.get(url, headers=headers)
         except:
-            logger.info('Failed to fetch contact, that may because of the amount of your chatrooms')
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '未能获取联系人，这可能是因为你的群聊数量过多')
             for chatroom in self.get_chatrooms():
                 self.update_chatroom(chatroom['UserName'], detailedMember=True)
             return 0, []
