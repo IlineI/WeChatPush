@@ -44,8 +44,7 @@ def load_login_status(self, fileDir,
             'Ret': -1002, }})
 
     if j.get('version', '') != VERSION:
-        print((str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat版本从 %s 更新至 %s，所以缓存状态被忽略') % (
-            j.get('version', 'old version'), VERSION))
+        print((str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat版本从 %s 更新至 %s，所以缓存状态被忽略') % (j.get('version', 'old version'), VERSION))
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'cached status ignored because of version',
             'Ret': -1005, }})
@@ -97,5 +96,5 @@ def load_last_login_status(session, cookiesDict):
             'MM_WX_NOTIFY_STATE': '1',
             'MM_WX_SOUND_STATE': '1', })
     except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '推送登录的加载状态失败，可能是因为cookies更改。')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '推送登录的加载状态失败，可能是因为cookies更改')
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '如果你使用的是最新版本的itchat，你可能需要提交bug')
