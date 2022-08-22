@@ -8,6 +8,13 @@ from requests.packages import urllib3
 from datetime import datetime
 from multiprocessing import Pool, Manager
 
+try:
+    import config
+except:
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+    print('程序终止运行')
+    os._exit(0)
+
 
 def config_update(value):
     try:
@@ -138,12 +145,14 @@ def simple_reply(msg):
 
 if __name__ == '__main__':
     try:
-        import config
+        urllib3.disable_warnings()
+        itchat.check_login()
+        itchat.auto_login(hotReload=True, enableCmdQR=2)
+    except KeyboardInterrupt:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
     except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-        print('程序终止运行')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
         os._exit(0)
-    urllib3.disable_warnings()
     value = Manager().dict()
     value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                     'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
@@ -151,13 +160,11 @@ if __name__ == '__main__':
                     'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
                     'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
                     'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
-    itchat.check_login()
-    itchat.auto_login(hotReload=True, enableCmdQR=2)
     if int(value.get('shield_mode')):
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
     else:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
-    pool = Pool(processes = 1)
+    pool = Pool(processes=1)
     pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
     pool.close()
     itchat.run()
