@@ -76,7 +76,7 @@ async def load_login_status(self, fileDir,
             for msg in msgList: self.msgList.put(msg)
         await self.start_receiving(exitCallback)
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功从热重载文件加载登录状态')
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你好，' + str(self.storageClass.nickName))
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '欢迎回来，' + str(self.storageClass.nickName))
         if hasattr(loginCallback, '__call__'):
             await loginCallback(self.storageClass.userName)
         return ReturnValue({'BaseResponse': {
