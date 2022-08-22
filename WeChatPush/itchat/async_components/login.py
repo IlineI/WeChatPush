@@ -113,7 +113,7 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
         utils.clear_screen()
         if os.path.exists(picDir or config.DEFAULT_QR):
             os.remove(picDir or config.DEFAULT_QR)
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你好，' +str(self.storageClass.nickName))
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你好，' + str(self.storageClass.nickName))
     await self.start_receiving(exitCallback)
     self.isLogging = False
 
