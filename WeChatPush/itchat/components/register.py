@@ -25,7 +25,7 @@ def auto_login(self, hotReload=False, statusStorageDir=str((os.path.dirname(os.p
                enableCmdQR=False, picDir=None, qrCallback=None,
                loginCallback=None, exitCallback=None):
     if not test_connect():
-        logger.info("You can't get access to internet or wechat domain, so exit.")
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '无法访问互联网或微信域名，程序停止运行。')
         sys.exit()
     self.useHotReload = hotReload
     self.hotReloadDir = statusStorageDir
