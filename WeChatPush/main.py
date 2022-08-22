@@ -57,7 +57,6 @@ def config_update(value):
 
 
 def forcequit(msg):
-    print('发生错误，程序强制停止运行')
     os._exit(0)
 
 
@@ -148,24 +147,24 @@ if __name__ == '__main__':
         urllib3.disable_warnings()
         itchat.check_login()
         itchat.auto_login(hotReload=True, enableCmdQR=2)
+        value = Manager().dict()
+        value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
+        pool = Pool(processes=1)
+        pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
+        pool.close()
+        if int(value.get('shield_mode')):
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
+        else:
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
     except KeyboardInterrupt:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
         os._exit(0)
     except:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
         os._exit(0)
-    value = Manager().dict()
-    value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
-                    'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
-                    'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
-                    'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
-                    'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
-                    'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
-    if int(value.get('shield_mode')):
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
-    else:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
-    pool = Pool(processes=1)
-    pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
-    pool.close()
     itchat.run()
