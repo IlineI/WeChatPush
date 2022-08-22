@@ -4,7 +4,7 @@ import io
 import json
 import copy
 import logging
-
+from datetime import datetime
 from .. import config, utils
 from ..returnvalues import ReturnValue
 from ..storage import contact_change
@@ -267,7 +267,7 @@ def update_local_uin(core, msg):
                     usernameChangedList.append(username)
                     logger.debug('已获取Uin: %s, %s' % (username, uin))
         else:
-            logger.debug('Wrong length of uins & usernames: %s, %s' % (
+            logger.debug('uin或用户名的长度错误: %s, %s' % (
                 len(uins), len(usernames)))
     else:
         logger.debug('没有找到uin')
