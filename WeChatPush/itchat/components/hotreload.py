@@ -38,7 +38,7 @@ def load_login_status(self, fileDir,
         with open(fileDir, 'rb') as f:
             j = pickle.load(f)
     except Exception as e:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '文件不存在，加载登录状态失败')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat.pkl文件不存在，登录后即可自动创建')
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'No such file, loading login status failed.',
             'Ret': -1002, }})
