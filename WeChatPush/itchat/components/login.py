@@ -41,7 +41,7 @@ def load_login(core):
 def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
           loginCallback=None, exitCallback=None):
     if self.alive or self.isLogging:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat已经运行并登录，勿重复运行。')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat已经运行，勿重复运行。')
         return
     self.isLogging = True
     while self.isLogging:
