@@ -1,7 +1,6 @@
 import logging, traceback, sys, threading
-sys.path.append('..')
-import filepath
 import os
+from datetime import datetime
 try:
     import Queue
 except ImportError:
