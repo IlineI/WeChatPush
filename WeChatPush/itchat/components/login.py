@@ -356,7 +356,8 @@ def sync_check(self):
     regx = r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}'
     pm = re.search(regx, r.text)
     if pm is None or pm.group(1) != '0':
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '同步出错，错误信息：' + str(r.text))
+        if str(r.text) != 'window.synccheck={retcode:"1101",selector:"0"}':
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '同步出错，错误信息：' + str(r.text))
         return None
     return pm.group(2)
 
