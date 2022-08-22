@@ -38,7 +38,7 @@ def load_login_status(self, fileDir,
         with open(fileDir, 'rb') as f:
             j = pickle.load(f)
     except Exception as e:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '热重载文件不存在/已失效，登录后即可自动创建')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '热重载文件不存在/已失效，扫码登录后即可自动创建/更新')
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'No such file, loading login status failed.',
             'Ret': -1002, }})
