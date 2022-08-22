@@ -8,6 +8,7 @@ import xml.dom.minidom
 import random
 import traceback
 import logging
+from datetime import datetime
 try:
     from httplib import BadStatusLine
 except ImportError:
@@ -210,8 +211,7 @@ def process_login_info(core, loginContent):
     #     elif node.nodeName == 'pass_ticket':
     #         core.loginInfo['pass_ticket'] = core.loginInfo['BaseRequest']['DeviceID'] = node.childNodes[0].data
     if not all([key in core.loginInfo for key in ('skey', 'wxsid', 'wxuin', 'pass_ticket')]):
-        logger.error(
-            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你的微信账号可能被限制登录网页版微信，错误信息：' + str(r.text))
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你的微信账号可能被限制登录网页版微信，错误信息：' + str(r.text))
         core.isLogging = False
         return False
     return True
