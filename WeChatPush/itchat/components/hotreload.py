@@ -30,7 +30,7 @@ def dump_login_status(self, fileDir=None):
         'storage'   : self.storageClass.dumps()}
     with open(fileDir, 'wb') as f:
         pickle.dump(status, f)
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功创建itchat.pkl文件')
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功创建/更新热重载文件')
 
 def load_login_status(self, fileDir,
         loginCallback=None, exitCallback=None):
@@ -38,7 +38,7 @@ def load_login_status(self, fileDir,
         with open(fileDir, 'rb') as f:
             j = pickle.load(f)
     except Exception as e:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat.pkl文件不存在，登录后即可自动创建')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '热重载文件不存在/已失效，登录后即可自动创建')
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'No such file, loading login status failed.',
             'Ret': -1002, }})
@@ -75,7 +75,7 @@ def load_login_status(self, fileDir,
             msgList = produce_msg(self, msgList)
             for msg in msgList: self.msgList.put(msg)
         self.start_receiving(exitCallback)
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功加载登录状态')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功从热重载文件加载登录状态')
         if hasattr(loginCallback, '__call__'):
             loginCallback()
         return ReturnValue({'BaseResponse': {
