@@ -30,7 +30,7 @@ async def dump_login_status(self, fileDir=None):
         'storage'   : self.storageClass.dumps()}
     with open(fileDir, 'wb') as f:
         pickle.dump(status, f)
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功转储热加载的登录状态。')
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功创建itchat.pkl文件')
 
 async def load_login_status(self, fileDir,
         loginCallback=None, exitCallback=None):
@@ -60,7 +60,7 @@ async def load_login_status(self, fileDir,
     if (msgList or contactList) is None:
         self.logout()
         await load_last_login_status(self.s, j['cookies'])
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '服务器拒绝，无法加载登录状态')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '服务器拒绝请求，无法自动登录，请重新扫码登陆')
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'server refused, loading login status failed.',
             'Ret': -1003, }})
