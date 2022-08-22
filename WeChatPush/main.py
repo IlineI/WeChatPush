@@ -1,6 +1,7 @@
 import itchat.content
 import requests
 import importlib
+import traceback
 import time
 import os
 from requests.packages import urllib3
@@ -9,38 +10,43 @@ from multiprocessing import Pool, Manager
 
 
 def config_update(value):
-    while 1:
-        try:
-            importlib.reload(config)
-        except:
-            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-            print('程序终止运行')
-            break
-        shield_mode_update = '0'
-        newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
-                    'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
-                    'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
-                    'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
-                    'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
-                    'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
-        for a in value.keys():
-            if str(a) == 'shield_mode':
-                if newcfg.get('shield_mode') != value.get('shield_mode'):
-                    if int(newcfg.get('shield_mode')):
-                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(newcfg.get('whitelist')) + '以及非群聊的消息将会推送')
-                    else:
-                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(newcfg.get('blacklist')) + '的消息将不会推送')
-                    shield_mode_update = '1'
-            elif str(a) == 'whitelist':
-                if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
-                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
-            elif str(a) == 'blacklist':
-                if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
-                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
-            elif str(value.get(a)) != str(newcfg.get(a)):
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + newcfg.get(a))
-        value.update(newcfg)
-        time.sleep(1)
+    try:
+        while 1:
+            try:
+                importlib.reload(config)
+            except:
+                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+                print('程序终止运行')
+                break
+            shield_mode_update = '0'
+            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
+            for a in value.keys():
+                if str(a) == 'shield_mode':
+                    if newcfg.get('shield_mode') != value.get('shield_mode'):
+                        if int(newcfg.get('shield_mode')):
+                            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(newcfg.get('whitelist')) + '以及非群聊的消息将会推送')
+                        else:
+                            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(newcfg.get('blacklist')) + '的消息将不会推送')
+                        shield_mode_update = '1'
+                elif str(a) == 'whitelist':
+                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
+                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
+                elif str(a) == 'blacklist':
+                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
+                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
+                elif str(value.get(a)) != str(newcfg.get(a)):
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + newcfg.get(a))
+            value.update(newcfg)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    except:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
 
 
 def forcequit(msg):
