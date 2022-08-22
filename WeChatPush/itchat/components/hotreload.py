@@ -30,7 +30,7 @@ def dump_login_status(self, fileDir=None):
         'storage'   : self.storageClass.dumps()}
     with open(fileDir, 'wb') as f:
         pickle.dump(status, f)
-    logger.debug('Dump login status for hot reload successfully.')
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功转储热加载的登录状态。')
 
 def load_login_status(self, fileDir,
         loginCallback=None, exitCallback=None):
@@ -38,14 +38,13 @@ def load_login_status(self, fileDir,
         with open(fileDir, 'rb') as f:
             j = pickle.load(f)
     except Exception as e:
-        logger.debug('No such file, loading login status failed.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '文件不存在，加载登录状态失败')
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'No such file, loading login status failed.',
             'Ret': -1002, }})
 
     if j.get('version', '') != VERSION:
-        logger.debug(('you have updated itchat from %s to %s, ' + 
-            'so cached status is ignored') % (
+        print((str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat版本从 %s 更新至 %s，所以缓存状态被忽略') % (
             j.get('version', 'old version'), VERSION))
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'cached status ignored because of version',
@@ -62,7 +61,7 @@ def load_login_status(self, fileDir,
     if (msgList or contactList) is None:
         self.logout()
         load_last_login_status(self.s, j['cookies'])
-        logger.debug('server refused, loading login status failed.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '服务器拒绝，无法加载登录状态')
         return ReturnValue({'BaseResponse': {
             'ErrMsg': 'server refused, loading login status failed.',
             'Ret': -1003, }})
@@ -77,7 +76,7 @@ def load_login_status(self, fileDir,
             msgList = produce_msg(self, msgList)
             for msg in msgList: self.msgList.put(msg)
         self.start_receiving(exitCallback)
-        logger.debug('loading login status succeeded.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功加载登录状态')
         if hasattr(loginCallback, '__call__'):
             loginCallback()
         return ReturnValue({'BaseResponse': {
@@ -98,5 +97,5 @@ def load_last_login_status(session, cookiesDict):
             'MM_WX_NOTIFY_STATE': '1',
             'MM_WX_SOUND_STATE': '1', })
     except:
-        logger.info('Load status for push login failed, we may have experienced a cookies change.')
-        logger.info('If you are using the newest version of itchat, you may report a bug.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '推送登录的加载状态失败，可能是因为cookies更改。')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '如果你使用的是最新版本的itchat，你可能需要提交bug')
