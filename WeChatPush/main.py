@@ -150,6 +150,7 @@ if __name__ == '__main__':
         itchat.auto_login(hotReload=True, enableCmdQR=2)
     except KeyboardInterrupt:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
+        os._exit(0)
     except:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
         os._exit(0)
