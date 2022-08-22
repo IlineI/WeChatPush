@@ -309,7 +309,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                 pass
             except:
                 retryCount += 1
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
+                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()))
                 if self.receivingRetryCount < retryCount:
                     self.alive = False
                 else:
