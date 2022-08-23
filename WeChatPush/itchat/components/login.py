@@ -379,7 +379,7 @@ def get_msg(self):
                         headers=headers, timeout=config.TIMEOUT)
         dic = json.loads(r.content.decode('utf-8', 'replace'))
     except:
-        dic = {'BaseResponse': {'Ret': '0'}}
+        dic = {'BaseResponse': {'Ret': '114514'}}
     if str(dic.get('BaseResponse').get('Ret')) != '0':
         return None, None
     self.loginInfo['SyncKey'] = dic['SyncKey']
