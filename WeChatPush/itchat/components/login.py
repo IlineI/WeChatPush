@@ -310,8 +310,8 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                 pass
             except:
                 retryCount += 1
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()))
                 if self.receivingRetryCount < retryCount:
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '基本信息获取失败且已达到最大重试次数，程序强制停止运行')
                     self.alive = False
                 else:
                     time.sleep(1)
@@ -374,12 +374,9 @@ def get_msg(self):
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
         'User-Agent': config.USER_AGENT}
-    try:
-        r = self.s.post(url, data=json.dumps(data),
-                        headers=headers, timeout=config.TIMEOUT)
-        dic = json.loads(r.content.decode('utf-8', 'replace'))
-    except:
-        dic = {'BaseResponse': {'Ret': '114514'}}
+    r = self.s.post(url, data=json.dumps(data),
+                    headers=headers, timeout=config.TIMEOUT)
+    dic = json.loads(r.content.decode('utf-8', 'replace'))
     if str(dic.get('BaseResponse').get('Ret')) != '0':
         return None, None
     self.loginInfo['SyncKey'] = dic['SyncKey']
