@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from ast import In
 import os, time, re, io
 import json
