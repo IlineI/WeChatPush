@@ -1,6 +1,4 @@
-import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
-import logging, traceback, threading
+import logging, traceback, sys, threading
 import os
 from datetime import datetime
 
