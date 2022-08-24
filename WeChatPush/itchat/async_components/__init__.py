@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from .contact import load_contact
 from .hotreload import load_hotreload
 from .login import load_login
