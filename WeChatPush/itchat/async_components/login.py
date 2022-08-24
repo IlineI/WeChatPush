@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import asyncio
 import os, time, re, io
 import threading
