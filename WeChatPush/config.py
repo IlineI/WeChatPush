@@ -47,7 +47,7 @@ whitelist = ['whitelist1', 'whitelist2']
 
 # 消息接收的接口
 # 旧接口，腾讯云，服务器在北京，延时低，无推送量限制，2023年2月起失效
-tdtt_interface = 'http://43.138.103.64:7890'
+tdtt_interface = 'https://tdtt.top/send'
 # 新接口，Cloudflare平台，服务器在美国，延时高，日总推送量5万条，理论永久有效
 #tdtt_interface = 'https://send.tdtt.top'
 
