@@ -1,6 +1,6 @@
 import os
 from .core import Core
-from .config import VERSION, ASYNC_COMPONENTS
+from .config import VERSION
 from .log import set_logging
 
 if int(os.environ.get('ITCHAT_UOS_ASYNC')):
