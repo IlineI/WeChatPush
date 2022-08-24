@@ -13,16 +13,16 @@ from ..storage import templates
 
 logger = logging.getLogger('itchat')
 
+
 def load_register(core):
     core.auto_login       = auto_login
     core.configured_reply = configured_reply
     core.msg_register     = msg_register
     core.run              = run
 
-async def auto_login(self, EventScanPayload=None,ScanStatus=None,event_stream=None,
-        hotReload=True, statusStorageDir=str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')) + '/itchat.pkl',
-        enableCmdQR=False, picDir=None, qrCallback=None,
-        loginCallback=None, exitCallback=None):
+
+async def auto_login(self, hotReload=False, enableCmdQR=False, picDir=None, qrCallback=None, loginCallback=None, exitCallback=None,
+                    statusStorageDir=str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')) + '/itchat.pkl'):
     if not test_connect():
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '无法访问互联网或微信域名，程序停止运行。')
         sys.exit()
@@ -32,14 +32,12 @@ async def auto_login(self, EventScanPayload=None,ScanStatus=None,event_stream=No
         if await self.load_login_status(statusStorageDir,
                 loginCallback=loginCallback, exitCallback=exitCallback):
             return
-        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, EventScanPayload=EventScanPayload, ScanStatus=ScanStatus, event_stream=event_stream,
-            loginCallback=loginCallback, exitCallback=exitCallback)
+        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, loginCallback=loginCallback, exitCallback=exitCallback)
         await self.dump_login_status(statusStorageDir)
     else:
-        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, EventScanPayload=EventScanPayload, ScanStatus=ScanStatus, event_stream=event_stream,
-            loginCallback=loginCallback, exitCallback=exitCallback)
+        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, loginCallback=loginCallback, exitCallback=exitCallback)
 
-async def configured_reply(self, event_stream, payload, message_container):
+async def configured_reply(self):
     ''' determine the type of message and reply if its method is defined
         however, I use a strange way to determine whether a msg is from massive platform
         I haven't found a better solution here
@@ -48,8 +46,6 @@ async def configured_reply(self, event_stream, payload, message_container):
     '''
     try:
         msg = self.msgList.get(timeout=1)
-        if 'MsgId' in msg.keys():
-            message_container[msg['MsgId']] = msg
     except Queue.Empty:
         pass
     else:
@@ -63,7 +59,7 @@ async def configured_reply(self, event_stream, payload, message_container):
             r = None
         else:
             try:
-                r = await replyFn(msg)
+                r = replyFn(msg)
                 if r is not None:
                     await self.send(r, msg.get('FromUserName'))
             except:
