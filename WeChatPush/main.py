@@ -1,4 +1,3 @@
-import itchat.content
 import requests
 import importlib
 import traceback
@@ -14,7 +13,12 @@ except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
     print('程序终止运行')
     os._exit(0)
+os.environ['ITCHAT_UOS_ASYNC'] = str(config.async_components)
+if int(os.environ.get('ITCHAT_UOS_ASYNC')):
+    import asyncio
+import itchat.content
 
+urllib3.disable_warnings()
 
 def config_update(value):
     try:
@@ -58,6 +62,13 @@ def config_update(value):
 
 def forcequit(msg):
     os._exit(0)
+
+
+def run(func):
+    if int(os.environ.get('ITCHAT_UOS_ASYNC')):
+        asyncio.get_event_loop().run_until_complete(asyncio.gather(func))
+    else:
+        func
 
 
 def data_send(url, **kwargs):
@@ -144,9 +155,8 @@ def simple_reply(msg):
 
 if __name__ == '__main__':
     try:
-        urllib3.disable_warnings()
-        itchat.check_login()
-        itchat.auto_login(hotReload=True, enableCmdQR=2)
+        run(itchat.check_login())
+        run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
         value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                         'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
@@ -167,4 +177,4 @@ if __name__ == '__main__':
     except:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
         os._exit(0)
-    itchat.run()
+    run(itchat.run())
