@@ -1,5 +1,3 @@
-import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
 import pickle, os
 import logging
 import requests
