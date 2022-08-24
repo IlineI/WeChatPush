@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import logging, copy, pickle
 from weakref import ref
 
