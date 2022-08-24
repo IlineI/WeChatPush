@@ -1,7 +1,5 @@
-import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
 import asyncio
-import os, time, re
+import os, time, re, io
 import threading
 import json
 import random
