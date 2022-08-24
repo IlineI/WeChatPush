@@ -1,4 +1,6 @@
-import re, os, sys, subprocess, copy, traceback, logging
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
+import re, os, subprocess, copy, traceback, logging
 
 try:
     from HTMLParser import HTMLParser
