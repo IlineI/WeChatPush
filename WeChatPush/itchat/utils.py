@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import re, os, sys, subprocess, copy, traceback, logging
 
 try:
