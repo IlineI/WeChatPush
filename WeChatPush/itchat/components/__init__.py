@@ -1,4 +1,4 @@
-import sys
+import sys, io
 sys.setdefaultencoding("utf-8")
 from .contact import load_contact
 from .hotreload import load_hotreload
