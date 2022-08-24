@@ -1,5 +1,5 @@
 import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.setdefaultencoding("utf-8")
 from .contact import load_contact
 from .hotreload import load_hotreload
 from .login import load_login
