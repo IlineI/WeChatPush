@@ -1,3 +1,5 @@
+# coding=utf-8
+
 TEXT = 'Text' #文本
 CARD = 'Card' #好友名片、公众号名片
 SHARING = 'Sharing' #未知卡片消息
