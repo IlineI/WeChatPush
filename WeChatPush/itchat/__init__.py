@@ -1,8 +1,9 @@
+import os
 from .core import Core
 from .config import VERSION, ASYNC_COMPONENTS
 from .log import set_logging
 
-if ASYNC_COMPONENTS:
+if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     from itchat.async_components import load_components
 else:
     from itchat.components import load_components
@@ -34,7 +35,7 @@ def load_sync_itchat() -> Core:
     return Core()
 
 
-if ASYNC_COMPONENTS:
+if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     instance = load_async_itchat()
 else:
     instance = load_sync_itchat()
