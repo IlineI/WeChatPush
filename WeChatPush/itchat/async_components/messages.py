@@ -1,4 +1,6 @@
-import os, time, re, io
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
+import os, time, re
 import json
 import mimetypes, hashlib
 import logging
