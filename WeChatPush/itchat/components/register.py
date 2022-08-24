@@ -1,5 +1,5 @@
 import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.setdefaultencoding("utf-8")
 import logging, traceback, threading
 import os
 from datetime import datetime
