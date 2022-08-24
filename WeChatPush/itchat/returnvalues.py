@@ -1,4 +1,5 @@
-#coding=utf8
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
 TRANSLATE = 'Chinese'
 
 class ReturnValue(dict):
