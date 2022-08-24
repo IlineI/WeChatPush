@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import pickle, os
 import logging
 import requests
