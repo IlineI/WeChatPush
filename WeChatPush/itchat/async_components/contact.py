@@ -1,4 +1,6 @@
-import time, re, io
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
+import time, re
 import json, copy
 import logging
 from datetime import datetime
