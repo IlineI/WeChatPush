@@ -3,6 +3,7 @@ import importlib
 import traceback
 import time
 import os
+import itchat.content
 from requests.packages import urllib3
 from datetime import datetime
 from multiprocessing import Pool, Manager
@@ -18,8 +19,6 @@ os.environ['ITCHAT_UOS_ASYNC'] = str(config.async_components)
 
 if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     import asyncio
-
-import itchat.content
 
 urllib3.disable_warnings()
 
@@ -91,12 +90,7 @@ def data_send(url, **kwargs):
             break
 
 
-@itchat.msg_register([itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.TEXT,
-                        itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD, itchat.content.SPLITTHEBILL,
-                        itchat.content.FRIENDS, itchat.content.MUSICSHARE, itchat.content.UNDEFINED, itchat.content.PICTURE,
-                        itchat.content.RECORDING, itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
-                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING, itchat.content.REDENVELOPE,
-                        itchat.content.MINIPROGRAM, itchat.content.SYSTEMNOTIFICATION], isFriendChat=True, isGroupChat=True)
+@itchat.msg_register(itchat.content.INCOME_MSG, isFriendChat=True, isGroupChat=True)
 def simple_reply(msg):
     notify = 0
     if int(value.get('shield_mode')):
