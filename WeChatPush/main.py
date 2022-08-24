@@ -1,6 +1,3 @@
-import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
-import itchat.content
 import requests
 import importlib
 import traceback
@@ -10,20 +7,18 @@ from requests.packages import urllib3
 from datetime import datetime
 from multiprocessing import Pool, Manager
 
-urllib3.disable_warnings()
-
 try:
     import config
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
     print('程序终止运行')
     os._exit(0)
-
 os.environ['ITCHAT_UOS_ASYNC'] = str(config.async_components)
-
 if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     import asyncio
+import itchat.content
 
+urllib3.disable_warnings()
 
 def config_update(value):
     try:
