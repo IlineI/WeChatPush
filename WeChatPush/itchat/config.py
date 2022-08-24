@@ -3,9 +3,6 @@ import random
 
 VERSION = '1.5.0.dev'
 
-# use this envrionment to initialize the async & sync componment
-ASYNC_COMPONENTS = os.environ.get('ITCHAT_UOS_ASYNC', False)
-
 BASE_URL = 'http://login.weixin.qq.com'
 OS = platform.system()  # Windows, Linux, Darwin
 DIR = os.getcwd()
