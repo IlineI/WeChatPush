@@ -35,8 +35,8 @@ def load_login(core):
     core.get_msg           = get_msg
     core.logout            = logout
 
-async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScanPayload=None,ScanStatus=None,event_stream=None,
-        loginCallback=None, exitCallback=None):
+
+async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, loginCallback=None, exitCallback=None):
     if self.alive or self.isLogging:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat已经运行，勿重复运行。')
         return
@@ -45,13 +45,9 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
     while self.isLogging:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '获取二维码的uuid')
         self.get_QRuuid()
-        payload = EventScanPayload(
-            status=ScanStatus.Waiting,
-            qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
-        )
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '下载二维码')
-        print(f"https://wechaty.js.org/qrcode/http://login.weixin.qq.com/l/{self.uuid}")
-        event_stream.emit('scan', payload)
+        await self.get_QR(enableCmdQR=enableCmdQR,
+                                picDir=picDir, qrCallback=qrCallback)
         await asyncio.sleep(0.1)
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '请使用微信扫描二维码')
         isLoggedIn = False
@@ -61,46 +57,21 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
                 # await qrCallback(uuid=self.uuid, status=status, qrcode=self.qrStorage.getvalue())
             if status == '200':
                 isLoggedIn = True
-                payload = EventScanPayload(
-                    status=ScanStatus.Scanned,
-                    qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-                )
-                event_stream.emit('scan', payload)
                 await asyncio.sleep(0.1)
             elif status == '201':
                 if isLoggedIn is not None:
                     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '请在10秒内确认登录')
                     isLoggedIn = None
                     time.sleep(10)
-                    payload = EventScanPayload(
-                        status=ScanStatus.Waiting,
-                        qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-                    )
-                    event_stream.emit('scan', payload)
                     await asyncio.sleep(0.1)
             elif status != '408':
-                payload = EventScanPayload(
-                    status=ScanStatus.Cancel,
-                    qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-                )
-                event_stream.emit('scan', payload)
                 await asyncio.sleep(0.1)
                 break
         if isLoggedIn:
-            payload = EventScanPayload(
-                status=ScanStatus.Confirmed,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-            )
-            event_stream.emit('scan', payload)
             await asyncio.sleep(0.1)
             break
         elif self.isLogging:
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '登录超时，重新加载二维码')
-            payload = EventScanPayload(
-                status=ScanStatus.Timeout,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-            )
-            event_stream.emit('scan', payload)
             await asyncio.sleep(0.1)
     else:
         return
@@ -310,7 +281,6 @@ async def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                     if msgList:
                         msgList = produce_msg(self, msgList)
                         for msg in msgList:
-                            print(1)
                             self.msgList.put(msg)
                     if contactList:
                         chatroomList, otherList = [], []
