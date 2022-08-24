@@ -1,5 +1,5 @@
 import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.setdefaultencoding("utf-8")
 import time
 import re
 import json
