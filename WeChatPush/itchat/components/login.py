@@ -3,7 +3,6 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
 import os
 import time
 import re
-import io
 import threading
 import json
 import xml.dom.minidom
