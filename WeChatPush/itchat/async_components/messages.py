@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import os, time, re, io
 import json
 import mimetypes, hashlib
