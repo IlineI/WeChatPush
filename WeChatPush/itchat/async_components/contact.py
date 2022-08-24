@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import time, re, io
 import json, copy
 import logging
