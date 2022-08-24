@@ -1,7 +1,6 @@
-import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
 import time
 import re
+import io
 import json
 import copy
 import logging
