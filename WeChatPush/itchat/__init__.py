@@ -1,5 +1,5 @@
 import sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="urf-8")
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 import os
 from .core import Core
 from .config import VERSION
