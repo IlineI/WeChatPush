@@ -3,7 +3,6 @@ import importlib
 import traceback
 import time
 import os
-import itchat.content
 from requests.packages import urllib3
 from datetime import datetime
 from multiprocessing import Pool, Manager
@@ -21,6 +20,8 @@ if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     import asyncio
 
 urllib3.disable_warnings()
+
+import itchat.content
 
 
 def config_update(value):
