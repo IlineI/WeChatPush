@@ -1,6 +1,7 @@
 # coding=utf-8
 
-import logging, copy, pickle
+import logging, copy
+from datetime import datetime
 from weakref import ref
 
 from ..returnvalues import ReturnValue
@@ -24,7 +25,7 @@ class AttributeDict(dict):
 
 class UnInitializedItchat(object):
     def _raise_error(self, *args, **kwargs):
-        logger.warning('An itchat instance is called before initialized')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '在初始化之前调用itchat实例')
     def __getattr__(self, value):
         return self._raise_error
 
