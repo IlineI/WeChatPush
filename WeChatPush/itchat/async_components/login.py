@@ -5,7 +5,6 @@ import os, time, re, io
 import threading
 import json
 import random
-import traceback
 import logging
 from datetime import datetime
 
