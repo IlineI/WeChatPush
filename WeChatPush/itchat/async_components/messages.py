@@ -4,10 +4,7 @@ import os, time, re, io
 import json
 import mimetypes, hashlib
 import logging
-from datetime import datetime
 from collections import OrderedDict
-
-
 from .. import config, utils
 from ..returnvalues import ReturnValue
 from ..storage import templates
