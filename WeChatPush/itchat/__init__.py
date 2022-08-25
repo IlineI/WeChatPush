@@ -5,11 +5,6 @@ from .core import Core
 from .config import VERSION
 from .log import set_logging
 
-if int(os.environ.get('ITCHAT_UOS_ASYNC')):
-    from itchat.async_components import load_components
-else:
-    from itchat.components import load_components
-
 __version__ = VERSION
 
 instanceList = []
