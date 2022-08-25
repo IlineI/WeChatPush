@@ -6,9 +6,7 @@ import re
 import io
 import threading
 import json
-import xml.dom.minidom
 import random
-import traceback
 import logging
 from datetime import datetime
 
