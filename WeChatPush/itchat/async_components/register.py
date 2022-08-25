@@ -93,6 +93,7 @@ async def run(self, debug=False, blockThread=True):
         try:
             while self.alive:
                 await self.configured_reply()
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '退出登录，程序停止运行')
         except KeyboardInterrupt:
             if self.useHotReload:
                 await self.dump_login_status()
