@@ -1,10 +1,15 @@
 # coding=utf-8
 
+import sys
+
+if int(sys.version_info.major) < 3:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
+        os._exit(0)
+
 import requests
 import importlib
 import traceback
 import time
-import sys
 import os
 from requests.packages import urllib3
 from datetime import datetime
@@ -19,12 +24,12 @@ except:
 
 os.environ['ITCHAT_UOS_ASYNC'] = str(config.async_components)
 
+import itchat.content
+
 if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     import asyncio
 
 urllib3.disable_warnings()
-
-import itchat.content
 
 
 def config_update(value):
@@ -156,9 +161,6 @@ def simple_reply(msg):
 
 
 if __name__ == '__main__':
-    if int(sys.version_info.major) < 3:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
-        os._exit(0)
     try:
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
