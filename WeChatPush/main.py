@@ -29,8 +29,6 @@ import itchat.content
 if int(os.environ.get('ITCHAT_UOS_ASYNC')):
     import asyncio
 
-urllib3.disable_warnings()
-
 
 def config_update(value):
     try:
@@ -162,6 +160,7 @@ def simple_reply(msg):
 
 if __name__ == '__main__':
     try:
+        urllib3.disable_warnings()
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
