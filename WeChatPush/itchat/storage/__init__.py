@@ -1,4 +1,6 @@
-import os, time, copy
+# coding=utf-8
+
+import copy
 from threading import Lock
 
 from .messagequeue import Queue

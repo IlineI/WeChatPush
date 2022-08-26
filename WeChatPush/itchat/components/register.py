@@ -1,5 +1,8 @@
+# coding=utf-8
+
 import logging, traceback, sys, threading
 import os
+from datetime import datetime
 
 try:
     import Queue
@@ -24,7 +27,7 @@ def auto_login(self, hotReload=False, statusStorageDir=str((os.path.dirname(os.p
                enableCmdQR=False, picDir=None, qrCallback=None,
                loginCallback=None, exitCallback=None):
     if not test_connect():
-        logger.info("You can't get access to internet or wechat domain, so exit.")
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '无法访问互联网或微信域名，程序停止运行。')
         sys.exit()
     self.useHotReload = hotReload
     self.hotReloadDir = statusStorageDir
@@ -91,7 +94,7 @@ def msg_register(self, msgType, isFriendChat=False, isGroupChat=False, isMpChat=
 
 
 def run(self, debug=False, blockThread=True):
-    logger.info('Start auto replying.')
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '登录成功，开始接收消息')
     if debug:
         set_logging(loggingLevel=logging.DEBUG)
 
@@ -99,13 +102,12 @@ def run(self, debug=False, blockThread=True):
         try:
             while self.alive:
                 self.configured_reply()
-            logger.warning('Login out')
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '退出登录，程序停止运行')
         except KeyboardInterrupt:
             if self.useHotReload:
                 self.dump_login_status()
             self.alive = False
-            logger.debug('itchat received an ^C and exit.')
-            logger.info('Bye~')
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
 
     if blockThread:
         reply_fn()

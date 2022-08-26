@@ -1,10 +1,19 @@
-import itchat.content
+# coding=utf-8
+
+import sys
+
+if int(sys.version_info.major) < 3:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
+        os._exit(0)
+
 import requests
 import importlib
+import traceback
+import time
 import os
 from requests.packages import urllib3
 from datetime import datetime
-
+from multiprocessing import Pool, Manager
 
 try:
     import config
@@ -13,8 +22,63 @@ except:
     print('程序终止运行')
     os._exit(0)
 
+os.environ['ITCHAT_UOS_ASYNC'] = str(config.async_components)
 
-urllib3.disable_warnings()
+import itchat.content
+
+if int(os.environ.get('ITCHAT_UOS_ASYNC')):
+    import asyncio
+
+
+def config_update(value):
+    try:
+        while 1:
+            try:
+                importlib.reload(config)
+            except:
+                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
+                print('程序终止运行')
+                break
+            shield_mode_update = '0'
+            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
+            for a in value.keys():
+                if str(a) == 'shield_mode':
+                    if newcfg.get('shield_mode') != value.get('shield_mode'):
+                        if int(newcfg.get('shield_mode')):
+                            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(newcfg.get('whitelist')) + '以及非群聊的消息将会推送')
+                        else:
+                            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(newcfg.get('blacklist')) + '的消息将不会推送')
+                        shield_mode_update = '1'
+                elif str(a) == 'whitelist':
+                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
+                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
+                elif str(a) == 'blacklist':
+                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
+                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
+                elif str(value.get(a)) != str(newcfg.get(a)):
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + newcfg.get(a))
+            value.update(newcfg)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    except:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
+
+
+def forcequit(msg):
+    os._exit(0)
+
+
+def run(func):
+    if int(os.environ.get('ITCHAT_UOS_ASYNC')):
+        asyncio.get_event_loop().run_until_complete(asyncio.gather(func))
+    else:
+        func
 
 
 def data_send(url, **kwargs):
@@ -33,29 +97,15 @@ def data_send(url, **kwargs):
             break
 
 
-@itchat.msg_register([itchat.content.EMOTICON, itchat.content.VOIP, itchat.content.WEBSHARE, itchat.content.TEXT,
-                        itchat.content.ATTACHMENT, itchat.content.VIDEO, itchat.content.CARD, itchat.content.SPLITTHEBILL,
-                        itchat.content.FRIENDS, itchat.content.MUSICSHARE, itchat.content.UNDEFINED, itchat.content.PICTURE,
-                        itchat.content.RECORDING, itchat.content.SERVICENOTIFICATION, itchat.content.TRANSFER, itchat.content.MAP,
-                        itchat.content.LOCATIONSHARE, itchat.content.CHATHISTORY, itchat.content.SHARING, itchat.content.REDENVELOPE,
-                        itchat.content.MINIPROGRAM, itchat.content.SYSTEMNOTIFICATION], isFriendChat=True, isGroupChat=True)
+@itchat.msg_register(itchat.content.INCOME_MSG, isFriendChat=True, isGroupChat=True)
 def simple_reply(msg):
-    try:
-        importlib.reload(config)
-    except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-        print('程序终止运行')
-        os._exit(0)
-    notify = True if str(msg.get('ChatRoom')) == '0' else False # 好友消息放行，拦截群消息
-    if config.whitelist: # 白名单群消息放行
-        if str(msg.get('NickName')) in list(config.whitelist):
-            notify = True
-    else: # 没有开启白名单，放行未加入黑名单的群消息
-        if str(msg.get('NickName')) not in list(config.blacklist):
-            notify = True
-        else:
-            notify = False # 拦截黑名单好友消息
-    if notify and str(msg.get('NotifyCloseContact')) == '0':
+    notify = 0
+    if int(value.get('shield_mode')):
+        if not int(msg.get('ChatRoom')) or str(msg.get('NickName')) in list(value.get('whitelist')): # 白名单模式，白名单群消息放行
+            notify = 1
+    elif str(msg.get('NickName')) not in list(value.get('blacklist')):
+        notify =  1
+    if int(notify) and not int(msg.get('NotifyCloseContact')):
         typesymbol = {
             itchat.content.TEXT: str(msg.get('Text')),
             itchat.content.FRIENDS: '好友请求',
@@ -80,7 +130,7 @@ def simple_reply(msg):
             itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
             itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')) }.get(msg['Type'])
         Name = str(msg.get('Name')) if str(msg.get('ChatRoom')) == '0' else '群聊 ' + str(msg.get('ChatRoomName'))
-        if str(msg.get('ChatRoom')) == '1':
+        if int(msg.get('ChatRoom')):
             typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
         if str(msg.get('Type')) == str(itchat.content.SHARING):
             print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
@@ -89,30 +139,48 @@ def simple_reply(msg):
         else:
             print(str(Name) + ': ' + str(typesymbol))
         if str(msg.get('Type')) == str(itchat.content.VOIP):
-            if str(config.VoIP_push) == '1' and str(config.tdtt_alias) != '':
-                data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
-            elif str(config.VoIP_push) == '2' and str(config.FarPush_regID) != '':
-                data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
-            elif str(config.VoIP_push) == '3' and str(config.WirePusher_ID) != '':
-                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_VoIP', action='weixin://')
+            if str(value.get('VoIP_push')) == '1' and str(value.get('tdtt_alias')) != '':
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
+            elif str(value.get('VoIP_push')) == '2' and str(value.get('FarPush_regID')) != '':
+                data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
+            elif str(value.get('VoIP_push')) == '3' and str(value.get('WirePusher_ID')) != '':
+                data_send(str(value.get('WirePusher_interface')), title='微信 ' + str(Name), message=str(typesymbol), id=str(value.get('WirePusher_ID')), type='WeChat_VoIP', action='weixin://')
             else:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
         else:
-            if str(config.chat_push) == '1' and str(config.tdtt_alias) != '':
-                data_send(str(config.tdtt_interface), title='微信 ' + str(Name), content=str(typesymbol), alias=str(config.tdtt_alias))
-            elif str(config.chat_push) == '2' and str(config.FarPush_regID) != '':
-                data_send(str(config.FarPush_interface), title='微信 ' + str(Name), content=str(typesymbol), regID=str(config.FarPush_regID), phone=str(config.FarPush_Phone_Type), through='0')
-            elif str(config.chat_push) == '3' and str(config.WirePusher_ID) != '':
-                data_send(str(config.WirePusher_interface), title='微信 ' + str(Name), message=str(typesymbol), id=str(config.WirePusher_ID), type='WeChat_chat', action='weixin://')
+            if str(value.get('chat_push')) == '1' and str(value.get('tdtt_alias')) != '':
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
+            elif str(value.get('chat_push')) == '2' and str(value.get('FarPush_regID')) != '':
+                data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
+            elif str(value.get('chat_push')) == '3' and str(value.get('WirePusher_ID')) != '':
+                data_send(str(value.get('WirePusher_interface')), title='微信 ' + str(Name), message=str(typesymbol), id=str(value.get('WirePusher_ID')), type='WeChat_chat', action='weixin://')
             else:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
 
 
 if __name__ == '__main__':
-    if(config.whitelist):
-        print('[白名单] ' + str(config.whitelist))
-    else:
-        print('[黑名单] ' + str(config.blacklist))
-    itchat.check_login()
-    itchat.auto_login(hotReload=True, enableCmdQR=2)
-    itchat.run()
+    try:
+        urllib3.disable_warnings()
+        run(itchat.check_login())
+        run(itchat.auto_login(hotReload=True, enableCmdQR=2))
+        value = Manager().dict()
+        value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
+        pool = Pool(processes=1)
+        pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
+        pool.close()
+        if int(value.get('shield_mode')):
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
+        else:
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
+    except KeyboardInterrupt:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
+        os._exit(0)
+    except:
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
+        os._exit(0)
+    run(itchat.run())

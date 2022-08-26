@@ -1,10 +1,13 @@
+# coding=utf-8
+
 import asyncio
 import os, time, re, io
 import threading
 import json
 import random
-import traceback
 import logging
+from datetime import datetime
+
 try:
     from httplib import BadStatusLine
 except ImportError:
@@ -33,24 +36,21 @@ def load_login(core):
     core.get_msg           = get_msg
     core.logout            = logout
 
-async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScanPayload=None,ScanStatus=None,event_stream=None,
-        loginCallback=None, exitCallback=None):
+
+async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, loginCallback=None, exitCallback=None):
     if self.alive or self.isLogging:
-        logger.warning('itchat has already logged in.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + 'itchat已经运行，勿重复运行。')
         return
     self.isLogging = True
 
     while self.isLogging:
-        logger.info('Getting uuid of QR code.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '获取二维码的uuid')
         self.get_QRuuid()
-        payload = EventScanPayload(
-            status=ScanStatus.Waiting,
-            qrcode=f"http://login.weixin.qq.com/l/{self.uuid}"
-        )
-        print(f"https://wechaty.js.org/qrcode/http://login.weixin.qq.com/l/{self.uuid}")
-        event_stream.emit('scan', payload)
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '下载二维码')
+        await self.get_QR(enableCmdQR=enableCmdQR,
+                                picDir=picDir, qrCallback=qrCallback)
         await asyncio.sleep(0.1)
-        # logger.info('Please scan the QR code to log in.')
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '请使用微信扫描二维码')
         isLoggedIn = False
         while not isLoggedIn:
             status = await self.check_login()
@@ -58,50 +58,25 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
                 # await qrCallback(uuid=self.uuid, status=status, qrcode=self.qrStorage.getvalue())
             if status == '200':
                 isLoggedIn = True
-                payload = EventScanPayload(
-                    status=ScanStatus.Scanned,
-                    qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-                )
-                event_stream.emit('scan', payload)
                 await asyncio.sleep(0.1)
             elif status == '201':
                 if isLoggedIn is not None:
-                    logger.info('Please press confirm on your phone in 10 sec.')
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '请在10秒内确认登录')
                     isLoggedIn = None
                     time.sleep(10)
-                    payload = EventScanPayload(
-                        status=ScanStatus.Waiting,
-                        qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-                    )
-                    event_stream.emit('scan', payload)
                     await asyncio.sleep(0.1)
             elif status != '408':
-                payload = EventScanPayload(
-                    status=ScanStatus.Cancel,
-                    qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-                )
-                event_stream.emit('scan', payload)
                 await asyncio.sleep(0.1)
                 break
         if isLoggedIn:
-            payload = EventScanPayload(
-                status=ScanStatus.Confirmed,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-            )
-            event_stream.emit('scan', payload)
             await asyncio.sleep(0.1)
             break
         elif self.isLogging:
-            logger.info('Log in time out, reloading QR code.')
-            payload = EventScanPayload(
-                status=ScanStatus.Timeout,
-                qrcode=f"https://login.weixin.qq.com/l/{self.uuid}"
-            )
-            event_stream.emit('scan', payload)
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '登录超时，重新加载二维码')
             await asyncio.sleep(0.1)
     else:
         return
-    logger.info('Loading the contact, this may take a little while.')
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '加载联系人，这会消耗一些时间')
     await self.web_init()
     await self.show_mobile_login()
     self.get_contact(True)
@@ -111,7 +86,7 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, EventScan
         utils.clear_screen()
         if os.path.exists(picDir or config.DEFAULT_QR):
             os.remove(picDir or config.DEFAULT_QR)
-    logger.info('Login successfully as %s' % self.storageClass.nickName)
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你好，' + str(self.storageClass.nickName))
     await self.start_receiving(exitCallback)
     self.isLogging = False
 
@@ -232,7 +207,7 @@ async def process_login_info(core, loginContent):
     #     elif node.nodeName == 'pass_ticket':
     #         core.loginInfo['pass_ticket'] = core.loginInfo['BaseRequest']['DeviceID'] = node.childNodes[0].data
     if not all([key in core.loginInfo for key in ('skey', 'wxsid', 'wxuin', 'pass_ticket')]):
-        logger.error('Your wechat account may be LIMITED to log in WEB wechat, error info:\n%s' % r.text)
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你的微信账号可能被限制登录网页版微信，错误信息：' + str(r.text))
         core.isLogging = False
         return False
     return True
@@ -307,7 +282,6 @@ async def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                     if msgList:
                         msgList = produce_msg(self, msgList)
                         for msg in msgList:
-                            print(1)
                             self.msgList.put(msg)
                     if contactList:
                         chatroomList, otherList = [], []
@@ -325,17 +299,14 @@ async def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                 pass
             except:
                 retryCount += 1
-                logger.error(traceback.format_exc())
                 if self.receivingRetryCount < retryCount:
+                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '基本信息获取失败且已达到最大重试次数，程序强制停止运行')
                     self.alive = False
                 else:
                     time.sleep(1)
         self.logout()
         if hasattr(exitCallback, '__call__'):
             exitCallback(self.storageClass.userName)
-        else:
-
-            logger.info('LOG OUT!')
     if getReceivingFnOnly:
         return maintain_loop
     else:
@@ -372,7 +343,8 @@ def sync_check(self):
     regx = r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}'
     pm = re.search(regx, r.text)
     if pm is None or pm.group(1) != '0':
-        logger.debug('Unexpected sync check result: %s' % r.text)
+        if str(r.text) != 'window.synccheck={retcode:"1101",selector:"0"}':
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '同步出错，错误信息：' + str(r.text))
         return None
     return pm.group(2)
 
@@ -388,12 +360,9 @@ def get_msg(self):
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
         'User-Agent' : config.USER_AGENT }
-    try:
-        r = self.s.post(url, data=json.dumps(data), headers=headers, timeout=config.TIMEOUT)
-        dic = json.loads(r.content.decode('utf-8', 'replace'))
-    except:
-        time.sleep(0.5)
-    if dic.get('BaseResponse').get('Ret') != 0: return None, None
+    r = self.s.post(url, data=json.dumps(data), headers=headers, timeout=config.TIMEOUT)
+    dic = json.loads(r.content.decode('utf-8', 'replace'))
+    if str(dic.get('BaseResponse').get('Ret')) != '0': return None, None
     self.loginInfo['SyncKey'] = dic['SyncKey']
     self.loginInfo['synckey'] = '|'.join(['%s_%s' % (item['Key'], item['Val'])
         for item in dic['SyncCheckKey']['List']])

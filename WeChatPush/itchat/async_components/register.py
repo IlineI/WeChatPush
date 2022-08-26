@@ -1,7 +1,9 @@
+# coding=utf-8
+
 import logging, traceback, sys, threading
-sys.path.append('..')
-import filepath
 import os
+from datetime import datetime
+
 try:
     import Queue
 except ImportError:
@@ -13,18 +15,18 @@ from ..storage import templates
 
 logger = logging.getLogger('itchat')
 
+
 def load_register(core):
     core.auto_login       = auto_login
     core.configured_reply = configured_reply
     core.msg_register     = msg_register
     core.run              = run
 
-async def auto_login(self, EventScanPayload=None,ScanStatus=None,event_stream=None,
-        hotReload=True, statusStorageDir=str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')) + '/itchat.pkl',
-        enableCmdQR=False, picDir=None, qrCallback=None,
-        loginCallback=None, exitCallback=None):
+
+async def auto_login(self, hotReload=False, enableCmdQR=False, picDir=None, qrCallback=None, loginCallback=None, exitCallback=None,
+                    statusStorageDir=str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')) + '/itchat.pkl'):
     if not test_connect():
-        logger.info("You can't get access to internet or wechat domain, so exit.")
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '无法访问互联网或微信域名，程序停止运行。')
         sys.exit()
     self.useHotReload = hotReload
     self.hotReloadDir = statusStorageDir
@@ -32,14 +34,12 @@ async def auto_login(self, EventScanPayload=None,ScanStatus=None,event_stream=No
         if await self.load_login_status(statusStorageDir,
                 loginCallback=loginCallback, exitCallback=exitCallback):
             return
-        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, EventScanPayload=EventScanPayload, ScanStatus=ScanStatus, event_stream=event_stream,
-            loginCallback=loginCallback, exitCallback=exitCallback)
+        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, loginCallback=loginCallback, exitCallback=exitCallback)
         await self.dump_login_status(statusStorageDir)
     else:
-        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, EventScanPayload=EventScanPayload, ScanStatus=ScanStatus, event_stream=event_stream,
-            loginCallback=loginCallback, exitCallback=exitCallback)
+        await self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback, loginCallback=loginCallback, exitCallback=exitCallback)
 
-async def configured_reply(self, event_stream, payload, message_container):
+async def configured_reply(self):
     ''' determine the type of message and reply if its method is defined
         however, I use a strange way to determine whether a msg is from massive platform
         I haven't found a better solution here
@@ -48,8 +48,6 @@ async def configured_reply(self, event_stream, payload, message_container):
     '''
     try:
         msg = self.msgList.get(timeout=1)
-        if 'MsgId' in msg.keys():
-            message_container[msg['MsgId']] = msg
     except Queue.Empty:
         pass
     else:
@@ -63,7 +61,7 @@ async def configured_reply(self, event_stream, payload, message_container):
             r = None
         else:
             try:
-                r = await replyFn(msg)
+                r = replyFn(msg)
                 if r is not None:
                     await self.send(r, msg.get('FromUserName'))
             except:
@@ -88,19 +86,19 @@ def msg_register(self, msgType, isFriendChat=False, isGroupChat=False, isMpChat=
     return _msg_register
 
 async def run(self, debug=False, blockThread=True):
-    logger.info('Start auto replying.')
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '登录成功，开始接收消息')
     if debug:
         set_logging(loggingLevel=logging.DEBUG)
     async def reply_fn():
         try:
             while self.alive:
                 await self.configured_reply()
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '退出登录，程序停止运行')
         except KeyboardInterrupt:
             if self.useHotReload:
                 await self.dump_login_status()
             self.alive = False
-            logger.debug('itchat received an ^C and exit.')
-            logger.info('Bye~')
+            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
     if blockThread:
         await reply_fn()
     else:

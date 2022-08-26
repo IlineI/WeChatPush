@@ -1,4 +1,5 @@
-#coding=utf8
+# coding=utf-8
+
 TRANSLATE = 'Chinese'
 
 class ReturnValue(dict):
