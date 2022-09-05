@@ -22,6 +22,7 @@ def error():
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
     with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
         f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
+    os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 
 try:
@@ -29,7 +30,6 @@ try:
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
     error()
-    os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 if int(config.async_components):
     import asyncio
@@ -43,8 +43,6 @@ def config_update(value):
             except:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
                 error()
-                os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
-                break
             shield_mode_update = '0'
             newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                         'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
@@ -74,7 +72,6 @@ def config_update(value):
         pass
     except:
         error()
-        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 
 def run(func):
