@@ -52,6 +52,7 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '下载二维码')
         qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
                                 picDir=picDir, qrCallback=qrCallback)
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '如果无法正常显示二维码，请手动打开程序目录下的QR.png图片')
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '请使用微信扫描二维码')
         isLoggedIn = False
         while not isLoggedIn:
