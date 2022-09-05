@@ -1,183 +1,95 @@
 # coding=utf-8
 
-import sys
-
-if int(sys.version_info.major) < 3:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
-        os._exit(0)
-
-import requests
-import importlib
-import traceback
-import time
 import os
-import itchat.content
-from requests.packages import urllib3
-from datetime import datetime
-from multiprocessing import Pool, Manager
+import sys
+sys.path.append(str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')))
+import conf
+from .core import Core
+from .config import VERSION
+from .log import set_logging
 
-try:
-    import conf
-except:
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-    print('程序终止运行')
-    os._exit(0)
+__version__ = VERSION
+
+instanceList = []
+
+
+def load_async_itchat() -> Core:
+    """load async-based itchat instance
+
+    Returns:
+        Core: the abstract interface of itchat
+    """
+    from itchat.async_components import load_components
+    load_components(Core)
+    return Core()
+
+
+def load_sync_itchat() -> Core:
+    """load sync-based itchat instance
+
+    Returns:
+        Core: the abstract interface of itchat
+    """
+    from itchat.components import load_components
+    load_components(Core)
+    return Core()
+
 
 if int(conf.async_components):
-    import asyncio
+    instance = load_async_itchat()
+else:
+    instance = load_sync_itchat()
 
+instanceList = [instance]
 
-def conf_update(value):
-    try:
-        while 1:
-            try:
-                importlib.reload(conf)
-            except:
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-                print('程序终止运行')
-                break
-            shield_mode_update = '0'
-            newcfg = {'chat_push': str(conf.chat_push), 'VoIP_push': str(conf.VoIP_push),
-                        'tdtt_alias': str(conf.tdtt_alias), 'FarPush_regID': str(conf.FarPush_regID),
-                        'WirePusher_ID': str(conf.WirePusher_ID), 'FarPush_Phone_Type': str(conf.FarPush_Phone_Type),
-                        'shield_mode': str(conf.shield_mode), 'blacklist': list(conf.blacklist),
-                        'whitelist': list(conf.whitelist), 'tdtt_interface': str(conf.tdtt_interface), 
-                        'FarPush_interface': str(conf.FarPush_interface), 'WirePusher_interface': str(conf.WirePusher_interface)}
-            for a in value.keys():
-                if str(a) == 'shield_mode':
-                    if newcfg.get('shield_mode') != value.get('shield_mode'):
-                        if int(newcfg.get('shield_mode')):
-                            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为白名单模式：群聊' + str(newcfg.get('whitelist')) + '以及非群聊的消息将会推送')
-                        else:
-                            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '切换为黑名单模式：' + str(newcfg.get('blacklist')) + '的消息将不会推送')
-                        shield_mode_update = '1'
-                elif str(a) == 'whitelist':
-                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
-                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
-                elif str(a) == 'blacklist':
-                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
-                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
-                elif str(value.get(a)) != str(newcfg.get(a)):
-                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + newcfg.get(a))
-            value.update(newcfg)
-            time.sleep(1)
-    except KeyboardInterrupt:
-        pass
-    except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
+# I really want to use sys.modules[__name__] = originInstance
+# but it makes auto-fill a real mess, so forgive me for my following **
+# actually it toke me less than 30 seconds, god bless Uganda
 
-
-def forcequit(msg):
-    os._exit(0)
-
-
-def run(func):
-    if int(conf.async_components):
-        asyncio.get_event_loop().run_until_complete(asyncio.gather(func))
-    else:
-        func
-
-
-def data_send(url, **kwargs):
-    for i in range(1, 5):
-        try:
-            response = requests.post(url, data=kwargs, timeout=5, verify=False)
-            if response.status_code > 299:
-                raise RuntimeError
-        except:
-            if str(i) == '4':
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '连续三次向接口发送数据超时/失败，可能是网络问题或接口失效，终止发送')
-                break
-            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '向接口发送数据超时/失败，第' + str(i) + '次重试')
-        else:
-            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '成功向接口发送数据↑')
-            break
-
-
-@itchat.msg_register(itchat.content.INCOME_MSG, isFriendChat=True, isGroupChat=True)
-def simple_reply(msg):
-    notify = 0
-    if int(value.get('shield_mode')):
-        if not int(msg.get('ChatRoom')) or str(msg.get('NickName')) in list(value.get('whitelist')): # 白名单模式，白名单群消息放行
-            notify = 1
-    elif str(msg.get('NickName')) not in list(value.get('blacklist')):
-        notify =  1
-    if int(notify) and not int(msg.get('NotifyCloseContact')):
-        typesymbol = {
-            itchat.content.TEXT: str(msg.get('Text')),
-            itchat.content.FRIENDS: '好友请求',
-            itchat.content.PICTURE: '[图片]',
-            itchat.content.RECORDING: '[语音]',
-            itchat.content.VIDEO: '[视频]',
-            itchat.content.LOCATIONSHARE: '[共享实时位置]',
-            itchat.content.CHATHISTORY: '[聊天记录]',
-            itchat.content.TRANSFER: '[转账]',
-            itchat.content.REDENVELOPE: '[红包]',
-            itchat.content.EMOTICON: '[动画表情]',
-            itchat.content.SPLITTHEBILL: '[群收款]',
-            itchat.content.SHARING: '[未知卡片消息]',
-            itchat.content.UNDEFINED: '[未知消息类型]',
-            itchat.content.VOIP: '[通话邀请]请及时打开微信查看',
-            itchat.content.SYSTEMNOTIFICATION: '[系统通知]',
-            itchat.content.ATTACHMENT: '[文件]' + str(msg.get('Text')),
-            itchat.content.CARD: '[名片]' + str(msg.get('Text')),
-            itchat.content.MUSICSHARE: '[音乐]' + str(msg.get('Text')),
-            itchat.content.SERVICENOTIFICATION: str(msg.get('Text')),
-            itchat.content.MAP: '[位置分享]' + str(msg.get('Text')),
-            itchat.content.WEBSHARE: '[链接]' + str(msg.get('Text')),
-            itchat.content.MINIPROGRAM: '[小程序]' + str(msg.get('Text')) }.get(msg['Type'])
-        Name = str(msg.get('Name')) if str(msg.get('ChatRoom')) == '0' else '群聊 ' + str(msg.get('ChatRoomName'))
-        if int(msg.get('ChatRoom')):
-            typesymbol = str(msg.get('Name')) + ': ' + str(typesymbol)
-        if str(msg.get('Type')) == str(itchat.content.SHARING):
-            print('[未知卡片消息，请在github上提交issue]: AppMsgType=' + str(msg.get('Text')))
-        elif str(msg.get('Type')) == str(itchat.content.UNDEFINED):
-            print('[未知消息类型，请在github上提交issue]: MsgType=' + str(msg.get('Text')))
-        else:
-            print(str(Name) + ': ' + str(typesymbol))
-        if str(msg.get('Type')) == str(itchat.content.VOIP):
-            if str(value.get('VoIP_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_VoIP')
-            elif str(value.get('VoIP_push')) == '2' and str(value.get('FarPush_regID')) != '':
-                data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
-            elif str(value.get('VoIP_push')) == '3' and str(value.get('WirePusher_ID')) != '':
-                data_send(str(value.get('WirePusher_interface')), title='微信 ' + str(Name), message=str(typesymbol), id=str(value.get('WirePusher_ID')), type='WeChat_VoIP', action='weixin://')
-            else:
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
-        else:
-            if str(value.get('chat_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_chat')
-            elif str(value.get('chat_push')) == '2' and str(value.get('FarPush_regID')) != '':
-                data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
-            elif str(value.get('chat_push')) == '3' and str(value.get('WirePusher_ID')) != '':
-                data_send(str(value.get('WirePusher_interface')), title='微信 ' + str(Name), message=str(typesymbol), id=str(value.get('WirePusher_ID')), type='WeChat_chat', action='weixin://')
-            else:
-                print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
-
-
-if __name__ == '__main__':
-    try:
-        urllib3.disable_warnings()
-        run(itchat.check_login())
-        run(itchat.auto_login(hotReload=True, enableCmdQR=2))
-        value = Manager().dict()
-        value.update({'chat_push': str(conf.chat_push), 'VoIP_push': str(conf.VoIP_push),
-                        'tdtt_alias': str(conf.tdtt_alias), 'FarPush_regID': str(conf.FarPush_regID),
-                        'WirePusher_ID': str(conf.WirePusher_ID), 'FarPush_Phone_Type': str(conf.FarPush_Phone_Type),
-                        'shield_mode': str(conf.shield_mode), 'blacklist': list(conf.blacklist),
-                        'whitelist': list(conf.whitelist), 'tdtt_interface': str(conf.tdtt_interface), 
-                        'FarPush_interface': str(conf.FarPush_interface), 'WirePusher_interface': str(conf.WirePusher_interface)})
-        pool = Pool(processes=1)
-        pool.apply_async(conf_update, args=(value, ), callback=forcequit, error_callback=forcequit)
-        pool.close()
-        if int(value.get('shield_mode')):
-            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
-        else:
-            print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
-    except KeyboardInterrupt:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
-        os._exit(0)
-    except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
-        os._exit(0)
-    run(itchat.run())
+# components.login
+login = instance.login
+get_QRuuid = instance.get_QRuuid
+get_QR = instance.get_QR
+check_login = instance.check_login
+web_init = instance.web_init
+show_mobile_login = instance.show_mobile_login
+start_receiving = instance.start_receiving
+get_msg = instance.get_msg
+logout = instance.logout
+# components.contact
+update_chatroom = instance.update_chatroom
+update_friend = instance.update_friend
+get_contact = instance.get_contact
+get_friends = instance.get_friends
+get_chatrooms = instance.get_chatrooms
+get_mps = instance.get_mps
+set_alias = instance.set_alias
+set_pinned = instance.set_pinned
+accept_friend = instance.accept_friend
+get_head_img = instance.get_head_img
+create_chatroom = instance.create_chatroom
+set_chatroom_name = instance.set_chatroom_name
+delete_member_from_chatroom = instance.delete_member_from_chatroom
+add_member_into_chatroom = instance.add_member_into_chatroom
+# components.messages
+send_raw_msg = instance.send_raw_msg
+send_msg = instance.send_msg
+upload_file = instance.upload_file
+send_file = instance.send_file
+send_image = instance.send_image
+send_video = instance.send_video
+send = instance.send
+revoke = instance.revoke
+# components.hotreload
+dump_login_status = instance.dump_login_status
+load_login_status = instance.load_login_status
+# components.register
+auto_login = instance.auto_login
+configured_reply = instance.configured_reply
+msg_register = instance.msg_register
+run = instance.run
+# other functions
+search_friends = instance.search_friends
+search_chatrooms = instance.search_chatrooms
+search_mps = instance.search_mps
+set_logging = set_logging
