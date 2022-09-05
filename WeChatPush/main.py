@@ -1,20 +1,20 @@
 # coding=utf-8
 
 import sys
+import os
+from datetime import datetime
 
 if int(sys.version_info.major) < 3:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
-        os._exit(0)
+        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 import requests
 import importlib
 import traceback
 import time
-import os
 import signal
 import itchat.content
 from requests.packages import urllib3
-from datetime import datetime
 from multiprocessing import Process, Manager
 
 
@@ -81,7 +81,7 @@ def run(func):
     if int(config.async_components):
         asyncio.get_event_loop().run_until_complete(asyncio.gather(func))
     else:
-        func
+        eval(str(func))
 
 
 def data_send(url, **kwargs):
