@@ -17,32 +17,32 @@ from datetime import datetime
 from multiprocessing import Pool, Manager
 
 try:
-    import conf
+    import config
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
     print('程序终止运行')
     os._exit(0)
 
-if int(conf.async_components):
+if int(config.async_components):
     import asyncio
 
 
-def conf_update(value):
+def config_update(value):
     try:
         while 1:
             try:
-                importlib.reload(conf)
+                importlib.reload(config)
             except:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
                 print('程序终止运行')
                 break
             shield_mode_update = '0'
-            newcfg = {'chat_push': str(conf.chat_push), 'VoIP_push': str(conf.VoIP_push),
-                        'tdtt_alias': str(conf.tdtt_alias), 'FarPush_regID': str(conf.FarPush_regID),
-                        'WirePusher_ID': str(conf.WirePusher_ID), 'FarPush_Phone_Type': str(conf.FarPush_Phone_Type),
-                        'shield_mode': str(conf.shield_mode), 'blacklist': list(conf.blacklist),
-                        'whitelist': list(conf.whitelist), 'tdtt_interface': str(conf.tdtt_interface), 
-                        'FarPush_interface': str(conf.FarPush_interface), 'WirePusher_interface': str(conf.WirePusher_interface)}
+            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
             for a in value.keys():
                 if str(a) == 'shield_mode':
                     if newcfg.get('shield_mode') != value.get('shield_mode'):
@@ -72,7 +72,7 @@ def forcequit(msg):
 
 
 def run(func):
-    if int(conf.async_components):
+    if int(config.async_components):
         asyncio.get_event_loop().run_until_complete(asyncio.gather(func))
     else:
         func
@@ -137,7 +137,7 @@ def simple_reply(msg):
             print(str(Name) + ': ' + str(typesymbol))
         if str(msg.get('Type')) == str(itchat.content.VOIP):
             if str(value.get('VoIP_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_VoIP')
             elif str(value.get('VoIP_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('VoIP_push')) == '3' and str(value.get('WirePusher_ID')) != '':
@@ -146,7 +146,7 @@ def simple_reply(msg):
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
         else:
             if str(value.get('chat_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_chat')
             elif str(value.get('chat_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('chat_push')) == '3' and str(value.get('WirePusher_ID')) != '':
@@ -161,14 +161,14 @@ if __name__ == '__main__':
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
-        value.update({'chat_push': str(conf.chat_push), 'VoIP_push': str(conf.VoIP_push),
-                        'tdtt_alias': str(conf.tdtt_alias), 'FarPush_regID': str(conf.FarPush_regID),
-                        'WirePusher_ID': str(conf.WirePusher_ID), 'FarPush_Phone_Type': str(conf.FarPush_Phone_Type),
-                        'shield_mode': str(conf.shield_mode), 'blacklist': list(conf.blacklist),
-                        'whitelist': list(conf.whitelist), 'tdtt_interface': str(conf.tdtt_interface), 
-                        'FarPush_interface': str(conf.FarPush_interface), 'WirePusher_interface': str(conf.WirePusher_interface)})
+        value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
+                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
+                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
+                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
         pool = Pool(processes=1)
-        pool.apply_async(conf_update, args=(value, ), callback=forcequit, error_callback=forcequit)
+        pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
         pool.close()
         if int(value.get('shield_mode')):
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
