@@ -4,35 +4,45 @@ import sys
 import os
 from datetime import datetime
 
-if int(sys.version_info.major) < 3:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
+pid = str(os.getpid())
+
+
+def error(pid):
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
+    with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
+        f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
+    try:
         os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
+    except:
+        os.system('taskkill /F /T /PID ' + str(pid))
+
+
+if int(sys.version_info.major) < 3:
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
+    try:
+        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
+    except:
+        os.system('taskkill /F /T /PID ' + str(pid))
 
 import requests
 import importlib
 import traceback
 import time
 import signal
-import itchat.content
 from requests.packages import urllib3
 from multiprocessing import Process, Manager
-
-
-def error():
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
-    with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
-        f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
-    os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 
 try:
     import config
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-    error()
+    error(str(pid))
 
 if int(config.async_components):
     import asyncio
+
+import itchat.content
 
 
 def config_update(value):
@@ -42,9 +52,9 @@ def config_update(value):
                 importlib.reload(config)
             except:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-                error()
+                error(str(value.get('pid')))
             shield_mode_update = '0'
-            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+            newcfg = {'pid': str(value.get('pid')), 'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                         'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
                         'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
                         'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
@@ -71,7 +81,7 @@ def config_update(value):
     except KeyboardInterrupt:
         pass
     except:
-        error()
+        error(str(value.get('pid')))
 
 
 def run(func):
@@ -140,7 +150,7 @@ def simple_reply(msg):
             print(str(Name) + ': ' + str(typesymbol))
         if str(msg.get('Type')) == str(itchat.content.VOIP):
             if str(value.get('VoIP_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_VoIP')
             elif str(value.get('VoIP_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('VoIP_push')) == '3' and str(value.get('WirePusher_ID')) != '':
@@ -149,7 +159,7 @@ def simple_reply(msg):
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
         else:
             if str(value.get('chat_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_chat')
             elif str(value.get('chat_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('chat_push')) == '3' and str(value.get('WirePusher_ID')) != '':
@@ -165,7 +175,7 @@ if __name__ == '__main__':
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
-        value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+        value.update({'pid': str(pid), 'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                         'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
                         'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
                         'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
@@ -181,6 +191,5 @@ if __name__ == '__main__':
         run(itchat.run())
     except KeyboardInterrupt:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
-        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
     except:
-        error()
+        error(str('pid'))
