@@ -16,7 +16,7 @@ except ImportError:
 import requests  # type: ignore
 from pyqrcode import QRCode
 
-from .. import config, utils
+from .. import conf, utils
 from ..returnvalues import ReturnValue
 from ..storage.templates import wrap_user_dict
 from .contact import update_local_chatrooms, update_local_friends
@@ -84,8 +84,8 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, loginCall
         r = await loginCallback(self.storageClass.userName)
     else:
         utils.clear_screen()
-        if os.path.exists(picDir or config.DEFAULT_QR):
-            os.remove(picDir or config.DEFAULT_QR)
+        if os.path.exists(picDir or conf.DEFAULT_QR):
+            os.remove(picDir or conf.DEFAULT_QR)
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '你好，' + str(self.storageClass.nickName))
     await self.start_receiving(exitCallback)
     self.isLogging = False
@@ -94,8 +94,8 @@ async def push_login(core):
     cookiesDict = core.s.cookies.get_dict()
     if 'wxuin' in cookiesDict:
         url = '%s/cgi-bin/mmwebwx-bin/webwxpushloginurl?uin=%s' % (
-            config.BASE_URL, cookiesDict['wxuin'])
-        headers = { 'User-Agent' : config.USER_AGENT}
+            conf.BASE_URL, cookiesDict['wxuin'])
+        headers = { 'User-Agent' : conf.USER_AGENT}
         r = core.s.get(url, headers=headers).json()
         if 'uuid' in r and r.get('ret') in (0, '0'):
             core.uuid = r['uuid']
@@ -103,13 +103,13 @@ async def push_login(core):
     return False
 
 def get_QRuuid(self):
-    url = '%s/jslogin' % config.BASE_URL
+    url = '%s/jslogin' % conf.BASE_URL
     params = {
         'appid' : 'wx782c26e4c19acffb',
         'fun'   : 'new',
         'redirect_uri' : 'https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?mod=desktop',
         'lang'  : 'zh_CN' }
-    headers = { 'User-Agent' : config.USER_AGENT}
+    headers = { 'User-Agent' : conf.USER_AGENT}
     r = self.s.get(url, params=params, headers=headers)
     regx = r'window.QRLogin.code = (\d+); window.QRLogin.uuid = "(\S+?)";'
     data = re.search(regx, r.text)
@@ -119,7 +119,7 @@ def get_QRuuid(self):
 
 async def get_QR(self, uuid=None, enableCmdQR=False, picDir=None, qrCallback=None):
     uuid = uuid or self.uuid
-    picDir = picDir or config.DEFAULT_QR
+    picDir = picDir or conf.DEFAULT_QR
     qrStorage = io.BytesIO()
     qrCode = QRCode('https://login.weixin.qq.com/l/' + uuid)
     qrCode.png(qrStorage, scale=10)
@@ -136,11 +136,11 @@ async def get_QR(self, uuid=None, enableCmdQR=False, picDir=None, qrCallback=Non
 
 async def check_login(self, uuid=None):
     uuid = uuid or self.uuid
-    url = '%s/cgi-bin/mmwebwx-bin/login' % config.BASE_URL
+    url = '%s/cgi-bin/mmwebwx-bin/login' % conf.BASE_URL
     localTime = int(time.time())
     params = 'loginicon=true&uuid=%s&tip=1&r=%s&_=%s' % (
         uuid, int(-localTime / 1579), localTime)
-    headers = { 'User-Agent' : config.USER_AGENT}
+    headers = { 'User-Agent' : conf.USER_AGENT}
     r = self.s.get(url, params=params, headers=headers)
     regx = r'window.code=(\d+)'
     data = re.search(regx, r.text)
@@ -162,9 +162,9 @@ async def process_login_info(core, loginContent):
     '''
     regx = r'window.redirect_uri="(\S+)";'
     core.loginInfo['url'] = re.search(regx, loginContent).group(1)
-    headers = { 'User-Agent' : config.USER_AGENT,
-                'client-version' : config.UOS_PATCH_CLIENT_VERSION,
-                'extspam' : config.UOS_PATCH_EXTSPAM,
+    headers = { 'User-Agent' : conf.USER_AGENT,
+                'client-version' : conf.UOS_PATCH_CLIENT_VERSION,
+                'extspam' : conf.UOS_PATCH_EXTSPAM,
                 'referer' : 'https://wx.qq.com/?&lang=zh_CN&target=t'
               }
     r = core.s.get(core.loginInfo['url'], headers=headers, allow_redirects=False)
@@ -220,7 +220,7 @@ async def web_init(self):
     data = { 'BaseRequest': self.loginInfo['BaseRequest'], }
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent' : config.USER_AGENT, }
+        'User-Agent' : conf.USER_AGENT, }
     r = self.s.post(url, params=params, data=json.dumps(data), headers=headers)
     dic = json.loads(r.content.decode('utf-8', 'replace'))
     # deal with login info
@@ -262,7 +262,7 @@ async def show_mobile_login(self):
         'ClientMsgId'  : int(time.time()), }
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent' : config.USER_AGENT, }
+        'User-Agent' : conf.USER_AGENT, }
     r = self.s.post(url, data=json.dumps(data), headers=headers)
     return ReturnValue(rawResponse=r)
 
@@ -324,10 +324,10 @@ def sync_check(self):
         'deviceid' : self.loginInfo['deviceid'],
         'synckey'  : self.loginInfo['synckey'],
         '_'        : self.loginInfo['logintime'], }
-    headers = { 'User-Agent' : config.USER_AGENT}
+    headers = { 'User-Agent' : conf.USER_AGENT}
     self.loginInfo['logintime'] += 1
     try:
-        r = self.s.get(url, params=params, headers=headers, timeout=config.TIMEOUT)
+        r = self.s.get(url, params=params, headers=headers, timeout=conf.TIMEOUT)
     except requests.exceptions.ConnectionError as e:
         try:
             if not isinstance(e.args[0].args[1], BadStatusLine):
@@ -359,8 +359,8 @@ def get_msg(self):
         'rr'          : ~int(time.time()), }
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent' : config.USER_AGENT }
-    r = self.s.post(url, data=json.dumps(data), headers=headers, timeout=config.TIMEOUT)
+        'User-Agent' : conf.USER_AGENT }
+    r = self.s.post(url, data=json.dumps(data), headers=headers, timeout=conf.TIMEOUT)
     dic = json.loads(r.content.decode('utf-8', 'replace'))
     if str(dic.get('BaseResponse').get('Ret')) != '0': return None, None
     self.loginInfo['SyncKey'] = dic['SyncKey']
@@ -375,7 +375,7 @@ def logout(self):
             'redirect' : 1,
             'type'     : 1,
             'skey'     : self.loginInfo['skey'], }
-        headers = { 'User-Agent' : config.USER_AGENT}
+        headers = { 'User-Agent' : conf.USER_AGENT}
         self.s.get(url, params=params, headers=headers)
         self.alive = False
     self.isLogging = False
