@@ -50,6 +50,7 @@ async def login(self, enableCmdQR=False, picDir=None, qrCallback=None, loginCall
         await self.get_QR(enableCmdQR=enableCmdQR,
                                 picDir=picDir, qrCallback=qrCallback)
         await asyncio.sleep(0.1)
+        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '如果无法正常显示二维码，请手动打开程序目录下的QR.png图片')
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '请使用微信扫描二维码')
         isLoggedIn = False
         while not isLoggedIn:
