@@ -7,7 +7,7 @@ import json
 import copy
 import logging
 from datetime import datetime
-from .. import config, utils
+from .. import conf, utils
 from ..returnvalues import ReturnValue
 from ..storage import contact_change
 from ..utils import update_info_dict
@@ -39,7 +39,7 @@ def update_chatroom(self, userName, detailedMember=False):
         self.loginInfo['url'], int(time.time()))
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     data = {
         'BaseRequest': self.loginInfo['BaseRequest'],
         'Count': len(userName),
@@ -59,7 +59,7 @@ def update_chatroom(self, userName, detailedMember=False):
                 self.loginInfo['url'], int(time.time()))
             headers = {
                 'ContentType': 'application/json; charset=UTF-8',
-                'User-Agent': config.USER_AGENT, }
+                'User-Agent': conf.USER_AGENT, }
             data = {
                 'BaseRequest': self.loginInfo['BaseRequest'],
                 'Count': len(memberList),
@@ -92,7 +92,7 @@ def update_friend(self, userName):
         self.loginInfo['url'], int(time.time()))
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     data = {
         'BaseRequest': self.loginInfo['BaseRequest'],
         'Count': len(userName),
@@ -286,7 +286,7 @@ def get_contact(self, update=False):
                                                           int(time.time()), seq, self.loginInfo['skey'])
         headers = {
             'ContentType': 'application/json; charset=UTF-8',
-            'User-Agent': config.USER_AGENT, }
+            'User-Agent': conf.USER_AGENT, }
         try:
             r = self.s.get(url, headers=headers)
         except:
@@ -352,7 +352,7 @@ def set_alias(self, userName, alias):
         'CmdId': 2,
         'RemarkName': alias,
         'BaseRequest': self.loginInfo['BaseRequest'], }
-    headers = {'User-Agent': config.USER_AGENT}
+    headers = {'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, json.dumps(data, ensure_ascii=False).encode('utf8'),
                     headers=headers)
     r = ReturnValue(rawResponse=r)
@@ -369,7 +369,7 @@ def set_pinned(self, userName, isPinned=True):
         'CmdId': 3,
         'OP': int(isPinned),
         'BaseRequest': self.loginInfo['BaseRequest'], }
-    headers = {'User-Agent': config.USER_AGENT}
+    headers = {'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, json=data, headers=headers)
     return ReturnValue(rawResponse=r)
 
@@ -389,7 +389,7 @@ def accept_friend(self, userName, v4='', autoUpdate=True):
         'skey': self.loginInfo['skey'], }
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, headers=headers,
                     data=json.dumps(data, ensure_ascii=False).encode('utf8', 'replace'))
     if autoUpdate:
@@ -428,7 +428,7 @@ def get_head_img(self, userName=None, chatroomUserName=None, picDir=None):
                 params['chatroomid'] = chatroom['EncryChatRoomId']
             params['chatroomid'] = params.get(
                 'chatroomid') or chatroom['UserName']
-    headers = {'User-Agent': config.USER_AGENT}
+    headers = {'User-Agent': conf.USER_AGENT}
     r = self.s.get(url, params=params, stream=True, headers=headers)
     tempStorage = io.BytesIO()
     for block in r.iter_content(1024):
@@ -454,7 +454,7 @@ def create_chatroom(self, memberList, topic=''):
         'Topic': topic, }
     headers = {
         'content-type': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, headers=headers,
                     data=json.dumps(data, ensure_ascii=False).encode('utf8', 'ignore'))
     return ReturnValue(rawResponse=r)
@@ -469,7 +469,7 @@ def set_chatroom_name(self, chatroomUserName, name):
         'NewTopic': name, }
     headers = {
         'content-type': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, headers=headers,
                     data=json.dumps(data, ensure_ascii=False).encode('utf8', 'ignore'))
     return ReturnValue(rawResponse=r)
@@ -484,7 +484,7 @@ def delete_member_from_chatroom(self, chatroomUserName, memberList):
         'DelMemberList': ','.join([member['UserName'] for member in memberList]), }
     headers = {
         'content-type': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, data=json.dumps(data), headers=headers)
     return ReturnValue(rawResponse=r)
 
@@ -515,6 +515,6 @@ def add_member_into_chatroom(self, chatroomUserName, memberList,
         memberKeyName: memberList, }
     headers = {
         'content-type': 'application/json; charset=UTF-8',
-        'User-Agent': config.USER_AGENT}
+        'User-Agent': conf.USER_AGENT}
     r = self.s.post(url, data=json.dumps(params), headers=headers)
     return ReturnValue(rawResponse=r)
