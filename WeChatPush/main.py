@@ -19,8 +19,9 @@ from multiprocessing import Process, Manager
 
 
 def error():
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序终止运行，错误信息：')
-    print(traceback.format_exc())
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
+    with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
+        f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
 
 
 try:
@@ -28,7 +29,7 @@ try:
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
     error()
-    os._exit(0)
+    os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 if int(config.async_components):
     import asyncio
@@ -163,6 +164,7 @@ def simple_reply(msg):
 if __name__ == '__main__':
     try:
         urllib3.disable_warnings()
+        errorlog_clean = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'w').close()
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
@@ -179,10 +181,9 @@ if __name__ == '__main__':
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
         else:
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
+        run(itchat.run())
     except KeyboardInterrupt:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
-        os._exit(0)
+        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
     except:
         error()
-        os._exit(0)
-    run(itchat.run())
