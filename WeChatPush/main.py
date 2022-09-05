@@ -11,16 +11,23 @@ import importlib
 import traceback
 import time
 import os
+import signal
 import itchat.content
 from requests.packages import urllib3
 from datetime import datetime
-from multiprocessing import Pool, Manager
+from multiprocessing import Process, Manager
+
+
+def error():
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序终止运行，错误信息：')
+    print(traceback.format_exc())
+
 
 try:
     import config
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-    print('程序终止运行')
+    error()
     os._exit(0)
 
 if int(config.async_components):
@@ -34,7 +41,8 @@ def config_update(value):
                 importlib.reload(config)
             except:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-                print('程序终止运行')
+                error()
+                os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
                 break
             shield_mode_update = '0'
             newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
@@ -64,11 +72,8 @@ def config_update(value):
     except KeyboardInterrupt:
         pass
     except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
-
-
-def forcequit(msg):
-    os._exit(0)
+        error()
+        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
 
 
 def run(func):
@@ -167,9 +172,9 @@ if __name__ == '__main__':
                         'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
                         'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
                         'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
-        pool = Pool(processes=1)
-        pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
-        pool.close()
+        conf_update = Process(target=config_update, args=(value, ))
+        conf_update.daemon = True
+        conf_update.start()
         if int(value.get('shield_mode')):
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
         else:
@@ -178,6 +183,6 @@ if __name__ == '__main__':
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
         os._exit(0)
     except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
+        error()
         os._exit(0)
     run(itchat.run())
