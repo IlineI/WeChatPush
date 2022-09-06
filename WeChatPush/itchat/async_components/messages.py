@@ -5,7 +5,7 @@ import json
 import mimetypes, hashlib
 import logging
 from collections import OrderedDict
-from .. import config, utils
+from .. import conf, utils
 from ..returnvalues import ReturnValue
 from ..storage import templates
 from .contact import update_local_uin
@@ -27,7 +27,7 @@ async def get_download_fn(core, url, msgId):
         params = {
             'msgid': msgId,
             'skey': core.loginInfo['skey'],}
-        headers = { 'User-Agent' : config.USER_AGENT}
+        headers = { 'User-Agent' : conf.USER_AGENT}
         r = core.s.get(url, params=params, stream=True, headers = headers)
         tempStorage = io.BytesIO()
         for block in r.iter_content(1024):
@@ -49,7 +49,7 @@ def produce_msg(core, msgList):
     for m in msgList:
         # get actual opposite
         if m.get('FromUserName') == core.storageClass.userName:
-            if config.SELF_MES:
+            if conf.SELF_MES:
                 actualOpposite = m.get('ToUserName')
             else:
                 # not send self mes
@@ -220,7 +220,7 @@ async def send_raw_msg(self, msgType, content, toUserName):
             'ClientMsgId': int(time.time() * 1e4),
             },
         'Scene': 0, }
-    headers = { 'ContentType': 'application/json; charset=UTF-8', 'User-Agent' : config.USER_AGENT}
+    headers = { 'ContentType': 'application/json; charset=UTF-8', 'User-Agent' : conf.USER_AGENT}
     r = self.s.post(url, headers=headers,
         data=json.dumps(data, ensure_ascii=False).encode('utf8'))
     return ReturnValue(rawResponse=r)
@@ -310,8 +310,8 @@ def upload_chunk_file(core, fileDir, fileSymbol, fileSize,
         del files['chunk']; del files['chunks']
     else:
         files['chunk'], files['chunks'] = (None, str(chunk)), (None, str(chunks))
-    headers = { 'User-Agent' : config.USER_AGENT}
-    return core.s.post(url, files=files, headers=headers, timeout=config.TIMEOUT)
+    headers = { 'User-Agent' : conf.USER_AGENT}
+    return core.s.post(url, files=files, headers=headers, timeout=conf.TIMEOUT)
 
 async def send_file(self, fileDir, toUserName=None, mediaId=None, file_=None):
     logger.debug('Request to send a file(mediaId: %s) to %s: %s' % (
@@ -347,7 +347,7 @@ async def send_file(self, fileDir, toUserName=None, mediaId=None, file_=None):
             'ClientMsgId': int(time.time() * 1e4), },
         'Scene': 0, }
     headers = {
-        'User-Agent': config.USER_AGENT,
+        'User-Agent': conf.USER_AGENT,
         'Content-Type': 'application/json;charset=UTF-8', }
     r = self.s.post(url, headers=headers,
         data=json.dumps(data, ensure_ascii=False).encode('utf8'))
@@ -389,7 +389,7 @@ async def send_image(self, fileDir=None, toUserName=None, mediaId=None, file_=No
         data['Msg']['Type'] = 47
         data['Msg']['EmojiFlag'] = 2
     headers = {
-        'User-Agent': config.USER_AGENT,
+        'User-Agent': conf.USER_AGENT,
         'Content-Type': 'application/json;charset=UTF-8', }
     r = self.s.post(url, headers=headers,
         data=json.dumps(data, ensure_ascii=False).encode('utf8'))
@@ -428,7 +428,7 @@ async def send_video(self, fileDir=None, toUserName=None, mediaId=None, file_=No
             'ClientMsgId'  : int(time.time() * 1e4), },
         'Scene': 0, }
     headers = {
-        'User-Agent' : config.USER_AGENT,
+        'User-Agent' : conf.USER_AGENT,
         'Content-Type': 'application/json;charset=UTF-8', }
     r = self.s.post(url, headers=headers,
         data=json.dumps(data, ensure_ascii=False).encode('utf8'))
@@ -469,7 +469,7 @@ async def revoke(self, msgId, toUserName, localId=None):
         "ToUserName": toUserName}
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
-        'User-Agent' : config.USER_AGENT }
+        'User-Agent' : conf.USER_AGENT }
     r = self.s.post(url, headers=headers,
         data=json.dumps(data, ensure_ascii=False).encode('utf8'))
     return ReturnValue(rawResponse=r)

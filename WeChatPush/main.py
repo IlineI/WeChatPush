@@ -1,33 +1,48 @@
 # coding=utf-8
 
 import sys
+import os
+from datetime import datetime
+
+pid = str(os.getpid())
+
+
+def error(pid):
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
+    with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
+        f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
+    try:
+        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
+    except:
+        os.system('taskkill /F /T /PID ' + str(pid))
+
 
 if int(sys.version_info.major) < 3:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
-        os._exit(0)
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
+    try:
+        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
+    except:
+        os.system('taskkill /F /T /PID ' + str(pid))
 
 import requests
 import importlib
 import traceback
 import time
-import os
+import signal
 from requests.packages import urllib3
-from datetime import datetime
-from multiprocessing import Pool, Manager
+from multiprocessing import Process, Manager
+
 
 try:
     import config
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-    print('程序终止运行')
-    os._exit(0)
+    error(str(pid))
 
-os.environ['ITCHAT_UOS_ASYNC'] = str(config.async_components)
+if int(config.async_components):
+    import asyncio
 
 import itchat.content
-
-if int(os.environ.get('ITCHAT_UOS_ASYNC')):
-    import asyncio
 
 
 def config_update(value):
@@ -37,10 +52,9 @@ def config_update(value):
                 importlib.reload(config)
             except:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-                print('程序终止运行')
-                break
+                error(str(value.get('pid')))
             shield_mode_update = '0'
-            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+            newcfg = {'pid': str(value.get('pid')), 'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                         'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
                         'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
                         'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
@@ -67,18 +81,14 @@ def config_update(value):
     except KeyboardInterrupt:
         pass
     except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
-
-
-def forcequit(msg):
-    os._exit(0)
+        error(str(value.get('pid')))
 
 
 def run(func):
-    if int(os.environ.get('ITCHAT_UOS_ASYNC')):
+    if int(config.async_components):
         asyncio.get_event_loop().run_until_complete(asyncio.gather(func))
     else:
-        func
+        eval(str(func))
 
 
 def data_send(url, **kwargs):
@@ -161,26 +171,25 @@ def simple_reply(msg):
 if __name__ == '__main__':
     try:
         urllib3.disable_warnings()
+        errorlog_clean = open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'w').close()
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
-        value.update({'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
+        value.update({'pid': str(pid), 'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
                         'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
                         'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
                         'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
                         'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
                         'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
-        pool = Pool(processes=1)
-        pool.apply_async(config_update, args=(value, ), callback=forcequit, error_callback=forcequit)
-        pool.close()
+        conf_update = Process(target=config_update, args=(value, ))
+        conf_update.daemon = True
+        conf_update.start()
         if int(value.get('shield_mode')):
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单模式：群聊' + str(value.get('whitelist')) + '以及非群聊的消息将会推送')
         else:
             print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单模式：' + str(value.get('blacklist')) + '的消息将不会推送')
+        run(itchat.run())
     except KeyboardInterrupt:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
-        os._exit(0)
     except:
-        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + traceback.format_exc())
-        os._exit(0)
-    run(itchat.run())
+        error(str('pid'))

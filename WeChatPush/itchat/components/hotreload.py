@@ -5,7 +5,7 @@ import logging
 import requests
 from datetime import datetime
 
-from ..config import VERSION
+from ..conf import VERSION
 from ..returnvalues import ReturnValue
 from ..storage import templates
 from .contact import update_local_chatrooms, update_local_friends

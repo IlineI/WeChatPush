@@ -1,8 +1,11 @@
 # coding=utf-8
 
 import os
+import sys
+sys.path.append(str((os.path.dirname(os.path.split(os.path.realpath(__file__))[0])).replace('\\', '/')))
+import config
 from .core import Core
-from .config import VERSION
+from .conf import VERSION
 from .log import set_logging
 
 __version__ = VERSION
@@ -32,7 +35,7 @@ def load_sync_itchat() -> Core:
     return Core()
 
 
-if int(os.environ.get('ITCHAT_UOS_ASYNC')):
+if int(config.async_components):
     instance = load_async_itchat()
 else:
     instance = load_sync_itchat()

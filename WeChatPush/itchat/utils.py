@@ -14,7 +14,7 @@ except ImportError:
 
 import requests
 
-from . import config
+from . import conf
 
 logger = logging.getLogger('itchat')
 
@@ -44,7 +44,7 @@ for k in ('UniFriend', 'Sex', 'AppAccountFlag', 'VerifyFlag', 'ChatRoomId', 'Hid
 friendInfoTemplate['MemberList'] = []
 
 def clear_screen():
-    os.system('cls' if config.OS == 'Windows' else 'clear')
+    os.system('cls' if conf.OS == 'Windows' else 'clear')
 
 def emoji_formatter(d, k):
     ''' _emoji_deebugger is for bugs about emoji match caused by wechat backstage
@@ -88,9 +88,9 @@ def check_file(fileDir):
         return False
 
 def print_qr(fileDir):
-    if config.OS == 'Darwin':
+    if conf.OS == 'Darwin':
         subprocess.call(['open', fileDir])
-    elif config.OS == 'Linux':
+    elif conf.OS == 'Linux':
         subprocess.call(['xdg-open', fileDir])
     else:
         os.startfile(fileDir)
@@ -133,7 +133,7 @@ def print_line(msg, oneLine = False):
 def test_connect(retryTime=5):
     for i in range(retryTime):
         try:
-            r = requests.get(config.BASE_URL)
+            r = requests.get(conf.BASE_URL)
             return True
         except:
             if i == retryTime - 1:
