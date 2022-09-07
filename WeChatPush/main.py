@@ -2,6 +2,7 @@
 
 import sys
 import os
+import signal
 from datetime import datetime
 
 pid = str(os.getpid())
@@ -12,7 +13,7 @@ def error(pid):
     with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
         f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
     try:
-        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
+        os.killpg(os.getpgid(str(pid)), signal.SIGKILL)
     except:
         os.system('taskkill /F /T /PID ' + str(pid))
 
@@ -28,7 +29,6 @@ import requests
 import importlib
 import traceback
 import time
-import signal
 from requests.packages import urllib3
 from multiprocessing import Process, Manager
 
