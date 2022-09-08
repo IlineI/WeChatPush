@@ -9,7 +9,7 @@ import sys
 import signal
 from datetime import datetime
 
-if float(str(sys.version_info.major) + '.' + str(sys.version_info.minor)) < 3.4:
+if int(sys.version_info.major) < 3:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.4及以上版本运行，程序强制停止运行')
     os.kill(pid, signal.SIGTERM)
 
