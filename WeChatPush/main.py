@@ -152,7 +152,7 @@ def simple_reply(msg):
             print(str(Name) + ': ' + str(typesymbol))
         if str(msg.get('Type')) == str(itchat.content.VOIP):
             if str(value.get('VoIP_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_VoIP')
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
             elif str(value.get('VoIP_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('VoIP_push')) == '3' and str(value.get('WirePusher_ID')) != '':
@@ -161,7 +161,7 @@ def simple_reply(msg):
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置有误，请更改配置')
         else:
             if str(value.get('chat_push')) == '1' and str(value.get('tdtt_alias')) != '':
-                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')), action='weixin://', type='WeChat_chat')
+                data_send(str(value.get('tdtt_interface')), title='微信 ' + str(Name), content=str(typesymbol), alias=str(value.get('tdtt_alias')))
             elif str(value.get('chat_push')) == '2' and str(value.get('FarPush_regID')) != '':
                 data_send(str(value.get('FarPush_interface')), title='微信 ' + str(Name), content=str(typesymbol), regID=str(value.get('FarPush_regID')), phone=str(value.get('FarPush_Phone_Type')), through='0')
             elif str(value.get('chat_push')) == '3' and str(value.get('WirePusher_ID')) != '':
