@@ -1,43 +1,45 @@
 # coding=utf-8
 
-import sys
 import os
+
+pid = os.getpid()
+ppid = os.getppid()
+
+import sys
+import signal
 from datetime import datetime
 
-pid = str(os.getpid())
-
-
-def error(pid):
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
-    with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
-        f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
-    try:
-        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
-    except:
-        os.system('taskkill /F /T /PID ' + str(pid))
-
-
 if int(sys.version_info.major) < 3:
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.x版本运行，程序强制停止运行')
-    try:
-        os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)
-    except:
-        os.system('taskkill /F /T /PID ' + str(pid))
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.4及以上版本运行，程序强制停止运行')
+    os.kill(pid, signal.SIGTERM)
 
 import requests
 import importlib
 import traceback
+import platform
 import time
-import signal
 from requests.packages import urllib3
 from multiprocessing import Process, Manager
+
+
+def error(pid, ppid):
+    system = str(platform.system())
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序运行出现错误，终止运行，错误信息已保存至程序目录下的error.log文件中')
+    with open(str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/')) + '/error.log', 'a', encoding='utf-8') as f:
+        f.write(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(traceback.format_exc()) + '\n')
+    if system == 'Linux':
+        os.killpg(os.getpgid(int(pid)), signal.SIGTERM)
+    elif system == 'Windows':
+        os.system('taskkill /F /T /PID ' + str(pid))
+    else:
+        os.kill(int(ppid), signal.SIGTERM)
 
 
 try:
     import config
 except:
     print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-    error(str(pid))
+    error(pid, ppid)
 
 if int(config.async_components):
     import asyncio
@@ -52,15 +54,15 @@ def config_update(value):
                 importlib.reload(config)
             except:
                 print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-                error(str(value.get('pid')))
+                error(value.get('pid'), value.get('ppid'))
+                break
             shield_mode_update = '0'
-            newcfg = {'pid': str(value.get('pid')), 'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
-                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
-                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
-                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
-                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push), 'tdtt_alias': str(config.tdtt_alias),
+                        'FarPush_regID': str(config.FarPush_regID), 'WirePusher_ID': str(config.WirePusher_ID),
+                        'FarPush_Phone_Type': str(config.FarPush_Phone_Type), 'shield_mode': str(config.shield_mode),
+                        'blacklist': list(config.blacklist), 'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
                         'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
-            for a in value.keys():
+            for a in newcfg.keys():
                 if str(a) == 'shield_mode':
                     if newcfg.get('shield_mode') != value.get('shield_mode'):
                         if int(newcfg.get('shield_mode')):
@@ -81,7 +83,7 @@ def config_update(value):
     except KeyboardInterrupt:
         pass
     except:
-        error(str(value.get('pid')))
+        error(value.get('pid'), value.get('ppid'))
 
 
 def run(func):
@@ -175,11 +177,11 @@ if __name__ == '__main__':
         run(itchat.check_login())
         run(itchat.auto_login(hotReload=True, enableCmdQR=2))
         value = Manager().dict()
-        value.update({'pid': str(pid), 'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push),
-                        'tdtt_alias': str(config.tdtt_alias), 'FarPush_regID': str(config.FarPush_regID),
-                        'WirePusher_ID': str(config.WirePusher_ID), 'FarPush_Phone_Type': str(config.FarPush_Phone_Type),
-                        'shield_mode': str(config.shield_mode), 'blacklist': list(config.blacklist),
-                        'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+        value.update({'pid': str(pid), 'ppid': str(ppid), 'chat_push': str(config.chat_push),
+                        'VoIP_push': str(config.VoIP_push), 'tdtt_alias': str(config.tdtt_alias),
+                        'FarPush_regID': str(config.FarPush_regID), 'WirePusher_ID': str(config.WirePusher_ID),
+                        'FarPush_Phone_Type': str(config.FarPush_Phone_Type), 'shield_mode': str(config.shield_mode),
+                        'blacklist': list(config.blacklist), 'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
                         'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)})
         conf_update = Process(target=config_update, args=(value, ))
         conf_update.daemon = True
@@ -192,4 +194,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '由于键盘输入^C（ctrl+C），程序强制停止运行')
     except:
-        error(str('pid'))
+        error(pid, ppid)
