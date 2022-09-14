@@ -137,7 +137,7 @@ def produce_msg(core, msgList):
             elif m.get('AppMsgType') == 17:
                 msg['Type'] = 'Locationshare'
                 msg['Text'] = m.get('FileName')
-            elif m.get('AppMsgType') == 33:
+            elif m.get('AppMsgType') in (33, 36):
                 msg['Type'] = 'Miniprogram'
                 msg['Text'] = m.get('FileName')
             elif m.get('AppMsgType') == 2000:
