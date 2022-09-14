@@ -5,8 +5,13 @@ import sys
 import signal
 from datetime import datetime
 
+
+def prt(mes):
+    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(mes))
+
+
 if int(sys.version_info.major) < 3:
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '程序仅支持Python3.4及以上版本运行，程序强制停止运行')
+    prt('程序仅支持Python3.4及以上版本运行，程序强制停止运行')
     os._exit(0)
 
 import requests
@@ -21,10 +26,6 @@ local_dir = str((os.path.split(os.path.realpath(__file__))[0]).replace('\\', '/'
 errorlog_clean = open(local_dir + '/error.log', 'w').close()
 ppid = os.getppid()
 pid = os.getpid()
-
-
-def prt(mes):
-    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + str(mes))
 
 
 def error_log(local):
@@ -86,12 +87,12 @@ def config_update(value):
                         shield_mode_update = '1'
                 elif str(a) == 'whitelist':
                     if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
-                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
+                        prt('白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
                 elif str(a) == 'blacklist':
                     if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
-                        print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + '黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
+                        prt('黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
                 elif str(value.get(a)) != str(newcfg.get(a)):
-                    print(str(datetime.now().strftime('[%Y.%m.%d %H:%M:%S] ')) + a + '更改,新' + a + '值为' + newcfg.get(a))
+                    prt(str(a) + '更改,新' + str(a) + '值为' + str(newcfg.get(a)))
             value.update(newcfg)
             time.sleep(1)
     except KeyboardInterrupt:
