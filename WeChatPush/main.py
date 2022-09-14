@@ -2,7 +2,6 @@
 
 import os
 import sys
-import signal
 from datetime import datetime
 
 
@@ -14,6 +13,7 @@ if int(sys.version_info.major) < 3:
     prt('程序仅支持Python3.4及以上版本运行，程序强制停止运行')
     os._exit(0)
 
+import signal
 import requests
 import importlib
 import traceback
