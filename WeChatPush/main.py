@@ -74,10 +74,10 @@ def config_update(value):
                 try:
                     importlib.reload(config)
                     newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push), 'tdtt_alias': str(config.tdtt_alias),
-                        'FarPush_regID': str(config.FarPush_regID), 'WirePusher_ID': str(config.WirePusher_ID),
-                        'FarPush_Phone_Type': str(config.FarPush_Phone_Type), 'shield_mode': str(config.shield_mode),
-                        'blacklist': list(config.blacklist), 'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
-                        'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
+                                'FarPush_regID': str(config.FarPush_regID), 'WirePusher_ID': str(config.WirePusher_ID),
+                                'FarPush_Phone_Type': str(config.FarPush_Phone_Type), 'shield_mode': str(config.shield_mode),
+                                'blacklist': list(config.blacklist), 'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
+                                'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
                 except:
                     prt('读取配置文件异常,请检查配置文件的语法是否有误或所需变量是否存在，程序使用最后一次正确的的配置')
                     error_log(value.get('local_dir'))
