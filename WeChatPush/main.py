@@ -64,39 +64,34 @@ def error(pid, ppid, errorlog_dir):
 
 def config_update(value):
     try:
+        config_path = value.get('local_dir') + '/config.py'
+        stat = os.stat(config_path)
+        old_st_mtime_ns = stat.st_mtime_ns
         while 1:
-            try:
-                importlib.reload(config)
-            except:
-                prt('配置获取异常,请检查配置文件是否存在/权限是否正确/语法是否有误')
-                error(value.get('pid'), value.get('ppid'), value.get('local_dir'))
-                break
-            shield_mode_update = '0'
-            newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push), 'tdtt_alias': str(config.tdtt_alias),
+            stat = os.stat(config_path)
+            if stat.st_mtime_ns != old_st_mtime_ns:
+                old_st_mtime_ns = stat.st_mtime_ns
+                try:
+                    importlib.reload(config)
+                    newcfg = {'chat_push': str(config.chat_push), 'VoIP_push': str(config.VoIP_push), 'tdtt_alias': str(config.tdtt_alias),
                         'FarPush_regID': str(config.FarPush_regID), 'WirePusher_ID': str(config.WirePusher_ID),
                         'FarPush_Phone_Type': str(config.FarPush_Phone_Type), 'shield_mode': str(config.shield_mode),
                         'blacklist': list(config.blacklist), 'whitelist': list(config.whitelist), 'tdtt_interface': str(config.tdtt_interface), 
                         'FarPush_interface': str(config.FarPush_interface), 'WirePusher_interface': str(config.WirePusher_interface)}
-            for a in list(newcfg.keys()):
-                if str(a) == 'shield_mode':
-                    if newcfg.get('shield_mode') != value.get('shield_mode'):
-                        if int(newcfg.get('shield_mode')):
-                            prt('切换为白名单模式：群聊' + str(newcfg.get('whitelist')) + '以及非群聊的消息将会推送')
-                        else:
-                            prt('切换为黑名单模式：' + str(newcfg.get('blacklist')) + '的消息将不会推送')
-                        shield_mode_update = '1'
-                elif str(a) == 'whitelist':
-                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and int(newcfg.get('shield_mode')):
-                        prt('白名单更改：群聊' + str(newcfg.get(a)) + '以及非群聊的消息将会推送')
-                elif str(a) == 'blacklist':
-                    if not int(shield_mode_update) and newcfg.get(a) != value.get(a) and not int(newcfg.get('shield_mode')):
-                        prt('黑名单更改：' + str(newcfg.get(a)) + '的消息将不会推送')
-                elif str(value.get(a)) != str(newcfg.get(a)):
-                    prt(str(a) + '更改,新' + str(a) + '值为' + str(newcfg.get(a)))
-            value.update(newcfg)
+                except:
+                    prt('读取配置文件异常,请检查配置文件的语法是否有误或所需变量是否存在，程序使用最后一次正确的的配置')
+                    error_log(value.get('local_dir'))
+                    continue
+                for i in list(newcfg.keys()):
+                    if str(value.get(i)) != str(newcfg.get(i)):
+                        prt(str(i) + '更改,新' + str(i) + '值为' + str(newcfg.get(i)))
+                value.update(newcfg)
             time.sleep(1)
     except KeyboardInterrupt:
         prt('由于触发了KeyboardInterrupt(同时按下了Ctrl+C等情况)，程序强制停止运行')
+    except FileNotFoundError:
+        prt('配置文件丢失，程序强制停止运行')
+        error(value.get('pid'), value.get('ppid'), value.get('local_dir'))
     except:
         error(value.get('pid'), value.get('ppid'), value.get('local_dir'))
 
