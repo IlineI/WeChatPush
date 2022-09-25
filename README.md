@@ -1,3 +1,4 @@
+# ！目前所有未上架小米应用商店的应用都被拉进了MiPush的小黑屋，包括“消息接收”以及“FarPush”，此程序的MiPush功能暂时无法正常工作！
 # WeChatPush
 微信消息推送到消息接收或FarPush或WirePusher    
 

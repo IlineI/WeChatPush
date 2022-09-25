@@ -54,7 +54,7 @@ tdtt_interface = 'https://tdtt.top/send'
 #tdtt_interface = 'https://send.tdtt.top'
 
 # FarPush的接口
-FarPush_interface = 'http://119.3.139.212:9090/PushWeChatMes'
+FarPush_interface = 'http://124.70.44.216:9090/PushWeChatMes'
 
 #WirePusher的接口
 WirePusher_interface = 'https://wirepusher.com/send'
